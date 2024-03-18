@@ -4,11 +4,12 @@ import numpy as np
 from scipy.stats import gamma, uniform, truncnorm
 import statistics
 from random import randint
-
+import itertools
 
 DELTA=10**(-5)
 C=1
 SIGMA=1.2
+EPSILON=1.5
 T=10
 
 
@@ -39,24 +40,44 @@ def compute_std_r2dp(alpha, k, theta, t):
         l1_r2dp *=mgf_value
     return l1_r2dp 
 
+def get_product_T(t, alpha, theta, k):
+    values=[ (1-(alpha-1) * theta)**(-k) for t1 in range(0,t)]
+    return np.prod(values)
+    
+def get_log_value(t, alpha, theta, k, DELTA):
+
+    value=(alpha/((2 * alpha) -1)) * get_product_T(t, alpha, theta, k) + (np.log((1/DELTA)))/(alpha-1) 
+
+    return np.log(value)
 
 
+def get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA):
 
+    all_values=[ (1/(alpha-1)) * get_log_value(t, alpha, theta, k, DELTA) for alpha in DEFAULT_ALPHAS]
+    min_value=np.min(all_values)
+    return min_value
 
 
 def get_optimal_k_theta():
+    
     all_r2dps_over_T={}
     for t in range(0,T):
         STD_R2DP_MIN=10**8
+        K_THETA= itertools.product(K, THETA)
+
         std_gause={}
-        for alpha in DEFAULT_ALPHAS:
-            for k in K:
-                for theta in THETA:
-                    l1_r2dp=compute_std_r2dp(alpha, k, theta, t)
-                    if STD_R2DP_MIN>l1_r2dp:
-                        STD_R2DP_MIN=l1_r2dp
-                        std_gause.update({'alpha':alpha,'k':k, 'theta':theta, 'l1':STD_R2DP_MIN})
-        print(f"t:{t}, alpha:{alpha}, k: {std_gause['k']}, and theta: {std_gause['theta']}, l1:{STD_R2DP_MIN}")
+        # for alpha in DEFAULT_ALPHAS:
+        alpha=1
+        # for k in K:
+        #     for theta in THETA:
+
+        for k, theta in K_THETA:
+            if get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA) <=EPSILON:
+                l1_r2dp=compute_std_r2dp(alpha, k, theta, t)
+                if STD_R2DP_MIN>l1_r2dp:
+                    STD_R2DP_MIN=l1_r2dp
+                    std_gause.update({'alpha':alpha,'k':k, 'theta':theta, 'l1':STD_R2DP_MIN})
+        print(f"t:{t}, alpha:{std_gause['alpha']}, k: {std_gause['k']}, and theta: {std_gause['theta']}, l1:{std_gause['l1']}")
         all_r2dps_over_T.update({t:std_gause})
 
     return all_r2dps_over_T
@@ -66,6 +87,10 @@ def get_optimal_k_theta():
 
 
 
+def plot_r2dps(data):
+
+    print("I am here")
+
 
 
 
@@ -74,5 +99,7 @@ def get_optimal_k_theta():
 if __name__=="__main__":
 
     all_r2dps_over_T = get_optimal_k_theta()
+
+    plot_r2dps(all_r2dps_over_T)
 
     print("I am done")
