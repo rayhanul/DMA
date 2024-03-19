@@ -1,10 +1,10 @@
-
-
 import numpy as np 
 from scipy.stats import gamma, uniform, truncnorm
 import statistics
 from random import randint
 import itertools
+import matplotlib.pyplot as plt 
+
 
 DELTA=10**(-5)
 C=1
@@ -89,7 +89,15 @@ def get_optimal_k_theta():
 
 def plot_r2dps(data):
 
-    print("I am here")
+    time_series=data.keys()
+    r2dp_series=[item['l1'] for item in data.values()]
+
+    plt.plot(time_series, r2dp_series)
+    plt.xlabel("Time")
+    plt.ylabel("STD_R2dp")
+    # plt.grid(True)
+    plt.show()
+
 
 
 
