@@ -13,8 +13,9 @@ EPSILON=1.5
 T=10
 
 
-K=np.linspace(1,100,10)  #shape paramter
-THETA=np.linspace(1,100,10) #scale paramter 
+K=np.linspace(1,100,50)  #shape paramter of gamma distribution  
+THETA=np.linspace(1,100,50) #scale paramter of gamma distribution 
+
 DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 
 def sensitivity():
@@ -30,7 +31,7 @@ def M(alpha, k, theta):
     return (1 + alpha * theta)**(-k) 
 
 def compute_std_r2dp(alpha, k, theta, t):
-    l1_r2dp=1
+    l1_r2dp=np.float128(1.0)
     for i in range(0,t):
         index=randint(1,99)
         t_values = np.linspace(0, 1/theta - 0.01, 100)
@@ -41,7 +42,12 @@ def compute_std_r2dp(alpha, k, theta, t):
     return l1_r2dp 
 
 def get_product_T(t, alpha, theta, k):
-    values=[ (1-(alpha-1) * theta)**(-k) for t1 in range(0,t)]
+    if t==1:
+        values=(1-(alpha-1) * theta)**(-k)
+        return values 
+    else :
+        values=[ (1-(alpha-1) * theta)**(-k) for t1 in range(1,t)]
+    
     return np.prod(values)
     
 def get_log_value(t, alpha, theta, k, DELTA):
@@ -61,7 +67,7 @@ def get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA):
 def get_optimal_k_theta():
     
     all_r2dps_over_T={}
-    for t in range(0,T):
+    for t in range(1,T):
         STD_R2DP_MIN=10**8
         K_THETA= itertools.product(K, THETA)
 
@@ -110,4 +116,4 @@ if __name__=="__main__":
 
     plot_r2dps(all_r2dps_over_T)
 
-    print("I am done")
+
