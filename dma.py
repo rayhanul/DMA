@@ -36,9 +36,9 @@ def compute_std_r2dp(alpha, k, theta, t):
         index=randint(1,99)
         t_values = np.linspace(0, 1/theta - 0.01, 100)
 
-        mgf_value= (1 - theta * t_values[index]) ** (-k)
+        mgf_value= (1 + theta * t_values) ** (-k)
     
-        l1_r2dp *=mgf_value
+        l1_r2dp *=sum(mgf_value)
     return l1_r2dp 
 
 def get_product_T(t, alpha, theta, k):
@@ -103,8 +103,6 @@ def plot_r2dps(data):
     plt.ylabel("STD_R2dp")
     # plt.grid(True)
     plt.show()
-
-
 
 
 
