@@ -1,5 +1,6 @@
 import numpy as np 
 from scipy.stats import gamma, uniform, truncnorm
+from scipy import integrate
 import statistics
 from random import randint
 import itertools
@@ -13,8 +14,9 @@ EPSILON=1.5
 T=10
 
 
-K=np.linspace(1,100,50)  #shape paramter of gamma distribution  
-THETA=np.linspace(1,100,50) #scale paramter of gamma distribution 
+K=np.linspace(1,100,50)  #shape paramter of gamma distribution. 
+K=np.round(K).astype(int) # Ensuring K as integer.
+THETA=np.linspace(1,100,50) #scale paramter of gamma distribution .
 
 DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 
@@ -25,43 +27,47 @@ def sensitivity():
     """
     return 1 
 
+def get_gaussian_epsilon(t, alpha, sigma):
 
-def M(alpha, k, theta):
+    return (alpha * t) / (2 * sigma**2 )
+def M(x, k, theta):
 
-    return (1 + alpha * theta)**(-k) 
+    return (1 + x * theta)**(-k) 
+
+def get_T_product_M(x, k, theta, t):
+
+    product=np.float128(1.0)
+    for i in range(1, t+1):
+        product *= M(x, k, theta)
+    return product
 
 def compute_std_r2dp(alpha, k, theta, t):
     l1_r2dp=np.float128(1.0)
     for i in range(0,t):
-        index=randint(1,99)
-        t_values = np.linspace(0, 1/theta - 0.01, 100)
-
-        mgf_value= (1 + theta * t_values) ** (-k)
-    
-        l1_r2dp *=sum(mgf_value)
+        result, _ = integrate.quad(lambda x: M(x, k, theta), 0, np.inf)
+        l1_r2dp *=result
     return l1_r2dp 
 
 def get_product_T(t, alpha, theta, k):
-    if t==1:
-        values=(1-(alpha-1) * theta)**(-k)
-        return values 
-    else :
-        values=[ (1-(alpha-1) * theta)**(-k) for t1 in range(1,t)]
-    
+
+    values=[ (1-((alpha-1) * theta))**(-k) for t1 in range(1,t+1)]
     return np.prod(values)
     
 def get_log_value(t, alpha, theta, k, DELTA):
 
     value=(alpha/((2 * alpha) -1)) * get_product_T(t, alpha, theta, k) + (np.log((1/DELTA)))/(alpha-1) 
-
-    return np.log(value)
+    val= np.log(value)
+    return val 
 
 
 def get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA):
 
     all_values=[ (1/(alpha-1)) * get_log_value(t, alpha, theta, k, DELTA) for alpha in DEFAULT_ALPHAS]
-    min_value=np.min(all_values)
-    return min_value
+    min_value_index=np.argmin(all_values)
+    min_value= all_values[min_value_index]
+    alpha=DEFAULT_ALPHAS[min_value_index]
+
+    return min_value_index, min_value, alpha
 
 
 def get_optimal_k_theta():
@@ -78,7 +84,10 @@ def get_optimal_k_theta():
         #     for theta in THETA:
 
         for k, theta in K_THETA:
-            if get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA) <=EPSILON:
+            _, min_value, alpha = get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA)
+            gaussian_epsilon=get_gaussian_epsilon(t, alpha, SIGMA)
+
+            if min_value <=gaussian_epsilon:
                 l1_r2dp=compute_std_r2dp(alpha, k, theta, t)
                 if STD_R2DP_MIN>l1_r2dp:
                     STD_R2DP_MIN=l1_r2dp
