@@ -34,19 +34,14 @@ def M(x, k, theta):
 
     return (1 + x * theta)**(-k) 
 
-def get_T_product_M(x, k, theta, t):
+def get_product_M_T_times(f, times):
 
-    product=np.float128(1.0)
-    for i in range(1, t+1):
-        product *= M(x, k, theta)
-    return product
+    return f**times  
 
 def compute_std_r2dp(alpha, k, theta, t):
     l1_r2dp=np.float128(1.0)
-    for i in range(0,t):
-        result, _ = integrate.quad(lambda x: M(x, k, theta), 0, np.inf)
-        l1_r2dp *=result
-    return l1_r2dp 
+    l1_r2dp, _ = integrate.quad(lambda x: get_product_M_T_times(M(x, k, theta), t), 0, np.inf)
+    return l1_r2dp
 
 def get_product_T(t, alpha, theta, k):
 
@@ -63,11 +58,11 @@ def get_log_value(t, alpha, theta, k, DELTA):
 def get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA):
 
     all_values=[ (1/(alpha-1)) * get_log_value(t, alpha, theta, k, DELTA) for alpha in DEFAULT_ALPHAS]
-    min_value_index=np.argmin(all_values)
-    min_value= all_values[min_value_index]
-    alpha=DEFAULT_ALPHAS[min_value_index]
+    min_index=np.argmin(all_values)
+    min_value= all_values[min_index]
+    alpha=DEFAULT_ALPHAS[min_index]
 
-    return min_value_index, min_value, alpha
+    return min_index, min_value, alpha
 
 
 def get_optimal_k_theta():
