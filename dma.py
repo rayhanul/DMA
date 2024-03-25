@@ -27,9 +27,11 @@ def sensitivity():
     """
     return 1 
 
-def get_gaussian_epsilon(t, alpha, sigma):
+def get_gaussian_epsilon_T(t, alpha, sigma, delta):
 
-    return (alpha * t) / (2 * sigma**2 )
+    value= (alpha * t) / (2 * sigma**2 ) + np.log(delta)/(alpha-1)
+
+    return value 
 def M(x, k, theta):
 
     return (1 + x * theta)**(-k) 
@@ -40,7 +42,7 @@ def get_product_M_T_times(f, times):
 
 def compute_std_r2dp(alpha, k, theta, t):
     l1_r2dp=np.float128(1.0)
-    l1_r2dp, _ = integrate.quad(lambda x: get_product_M_T_times(M(x, k, theta), t), 0, np.inf)
+    l1_r2dp, _ = integrate.quad(lambda x: get_product_M_T_times(M(x, k, theta), t), 0, 1/theta)
     return l1_r2dp
 
 def get_product_T(t, alpha, theta, k):
@@ -55,7 +57,7 @@ def get_log_value(t, alpha, theta, k, DELTA):
     return val 
 
 
-def get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA):
+def get_minimum_for_alphas_T(t, DEFAULT_ALPHAS, theta, k, DELTA):
 
     all_values=[ (1/(alpha-1)) * get_log_value(t, alpha, theta, k, DELTA) for alpha in DEFAULT_ALPHAS]
     min_index=np.argmin(all_values)
@@ -79,8 +81,8 @@ def get_optimal_k_theta():
         #     for theta in THETA:
 
         for k, theta in K_THETA:
-            _, min_value, alpha = get_minimum_for_alphas(t, DEFAULT_ALPHAS, theta, k, DELTA)
-            gaussian_epsilon=get_gaussian_epsilon(t, alpha, SIGMA)
+            _, min_value, alpha = get_minimum_for_alphas_T(t, DEFAULT_ALPHAS, theta, k, DELTA)
+            gaussian_epsilon=get_gaussian_epsilon_T(t, alpha, SIGMA, DELTA)
 
             if min_value <=gaussian_epsilon:
                 l1_r2dp=compute_std_r2dp(alpha, k, theta, t)
