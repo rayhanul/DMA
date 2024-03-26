@@ -16,16 +16,25 @@ T=10
 
 K=np.linspace(1,100,50)  #shape paramter of gamma distribution. 
 K=np.round(K).astype(int) # Ensuring K as integer.
-THETA=np.linspace(1,100,50) #scale paramter of gamma distribution .
 
+
+def get_random_sample_theta(num_samples):
+    """
+    generate samples for theta using log.space 
+    """
+    samples_0_1 = np.logspace(0, 1, num_samples // 2)
+    samples_10e_5_0 = np.logspace(10**-5, 0, num_samples // 4)
+    samples_1_100 = np.logspace(1, 100, num_samples // 4)
+
+    theta_samples = np.concatenate((samples_0_1, samples_10e_5_0, samples_1_100))
+    print(theta_samples)
+    return theta_samples
+
+
+# THETA=get_random_sample_theta(50) #scale paramter of gamma distribution .
+THETA=np.linspace(1,100,50) 
 DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 
-def sensitivity():
-    """
-    this return the sensitivitiy, we consider it as 1. 
-
-    """
-    return 1 
 
 def get_gaussian_epsilon_T(t, alpha, sigma, delta):
 
@@ -53,6 +62,8 @@ def get_product_T(t, alpha, theta, k):
 def get_log_value(t, alpha, theta, k, DELTA):
 
     value=(alpha/((2 * alpha) -1)) * get_product_T(t, alpha, theta, k) + (np.log((1/DELTA)))/(alpha-1) 
+    if value <=0:
+        return 1
     val= np.log(value)
     return val 
 
