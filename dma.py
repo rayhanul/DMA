@@ -11,12 +11,23 @@ DELTA=10**(-5)
 C=1
 SIGMA=1.2
 EPSILON=1.5
-T=30
+T=15
 
 
-K=np.linspace(1,100,50)  #shape paramter of gamma distribution. 
-K=np.round(K).astype(int) # Ensuring K as integer.
+K=np.random.randint(1,20,20)  #shape paramter of gamma distribution. 
+# K=np.round(K).astype(int) # Ensuring K as integer.
 
+def get_random_theta(num_samples):
+
+    samples_part1 = np.round(np.random.uniform(0, 1, num_samples // 2), 2) 
+
+
+    samples_part2 = np.random.uniform(0, 10, num_samples // 2)
+
+    
+    samples = np.concatenate((samples_part1, samples_part2))
+
+    return samples
 
 def get_random_sample_theta(num_samples):
     """
@@ -31,8 +42,10 @@ def get_random_sample_theta(num_samples):
     return theta_samples
 
 
-# THETA=get_random_sample_theta(50) #scale paramter of gamma distribution .
-THETA=np.linspace(1,100,50) 
+# THETA=np.round(np.random.uniform(0, 1, 50), 2) 
+
+# THETA=np.round(np.random.uniform(1, 10, 15), 2)
+THETA=get_random_theta(20)
 
 DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 
@@ -80,22 +93,31 @@ def get_minimum_for_alphas_T(t, DEFAULT_ALPHAS, theta, k, DELTA):
     return min_index, min_value, alpha
 
 
-def get_epsilon_R2DP_T(t, history, alpha, theta, k, DELTA):
+def get_epsilon_R2DP_T(t, history, default_alphas, theta, k, DELTA):
 
     def inner_gamma(alpha, k, theta):
         return (1- (alpha-1) * theta) **(-k)
 
-    values=val= (1/(alpha-1)) 
-    log_value=(alpha/((2 * alpha) -1)) * inner_gamma(alpha, k, theta)
-    if len(history)>0:
-        for key, val in history.items():
-            log_value *= inner_gamma(alpha, val["k"], val["theta"])
-        log_value+= (np.log((1/DELTA)))/(alpha-1) 
-        values *=np.log(log_value)
+    def get_epsilon(alpha, k, theta, DELTA):
+        values=val= (1/(alpha-1)) 
+        log_value=(alpha/((2 * alpha) -1)) * inner_gamma(alpha, k, theta)
+        if len(history)>0:
+            for key, val in history.items():
+                log_value *= inner_gamma(alpha, val["k"], val["theta"])
+            log_value+= (np.log((1/DELTA)))/(alpha-1) 
+            values *=np.log(log_value)
 
-    values+= (np.log((1/DELTA)))/(alpha-1) 
+        values+= (np.log((1/DELTA)))/(alpha-1) 
 
-    return values 
+        return values
+    
+    all_epsilon_values=[ get_epsilon(alpha, k, theta, DELTA) for alpha in default_alphas]
+
+    min_epsilon_index=np.argmin(all_epsilon_values)
+    min_epsilon=all_epsilon_values[min_epsilon_index]
+    min_alpha=default_alphas[min_epsilon_index]
+
+    return min_epsilon, min_alpha
 
 
 def get_gamma_mgf_for_T(t, k, theta):
@@ -146,35 +168,57 @@ def mgf_gamma(theta, k, t):
     """
     return the moment generating function of a gamma distribution. 
     """
+    if theta==1.0 or theta ==1:
+        theta=theta+0.1
     return (1 - t * theta)**(-k) 
     
 def get_utility_r2dp(theta, k):
     """
     return l1 utility of R2DP considerng moment generating function of gamma distribution. 
     """
+    integral_value=np.float128(0.0)
 
     integral_value, error_estimate = integrate.quad(lambda t: mgf_gamma(theta, k, t), 0, 1/theta)
 
     return integral_value
 
+
 def get_utility_R2DP_T(history, theta, k):
-
-    def inner_gamma(x, k, theta):
-        return (1- x * theta) **(-k)
-
+       
     def get_T_times_gamma(history, x, k, theta):
       
-        values = inner_gamma(x, k, theta)
+        values = get_utility_r2dp(theta, k)
+        
+        integral_values=[get_utility_r2dp(val["theta"], val["k"]) for key, val in history.items()]
+        prod = np.prod(integral_values)
+        return values * prod 
     
-        if len(history)>0:
-            for key, val in history.items():
-                values *= inner_gamma(x, val["k"], val["theta"])
-    
-    
-    integral_value, error_estimate = integrate.quad(lambda x: get_T_times_gamma(history, x, k, theta), 0, (1/theta)-0.1)
 
-
+    integral_value = get_T_times_gamma(history, 1, k, theta)
     return integral_value 
+
+
+# def get_utility_R2DP_T(history, theta, k):
+
+#     def inner_gamma(x, k, theta):
+#         val=(1- x * theta) **(-k)
+#         if val =="None":
+#             print(" I am here")
+#         return val 
+
+#     def get_T_times_gamma(history, x, k, theta):
+      
+#         values = inner_gamma(x, k, theta)
+
+#         if len(history)>0:
+#             for key, val in history.items():
+#                 values *= inner_gamma(x, val["k"], val["theta"])
+        # return values 
+    
+#     integral_value, error_estimate = integrate.quad(lambda x: get_T_times_gamma(history, x, k, theta), 0, (1/theta)-0.01)
+
+
+#     return integral_value 
 
 # def get_optimal_k_theta():
     
@@ -210,7 +254,7 @@ def get_optimal_k_theta():
     
     all_r2dps_over_T={}
     for t in range(1,T):
-        STD_R2DP_MIN=10**8
+        STD_R2DP_MIN = float('inf') 
         K_THETA= itertools.product(K, THETA)
 
         std_gause={}
@@ -224,10 +268,11 @@ def get_optimal_k_theta():
 
         for k, theta in K_THETA:
             # mgf_gamma = get_gamma_mgf_for_T(t, k, theta)
-            epsilon_R2DP = get_epsilon_R2DP_T(t, all_r2dps_over_T, alpha_star_gaussian, theta, k, DELTA)
+            epsilon_R2DP, min_alpha = get_epsilon_R2DP_T(t, all_r2dps_over_T, DEFAULT_ALPHAS, theta, k, DELTA)
 
             if epsilon_R2DP <=epsilon_star_gaussian:
                 l1_r2dp= get_utility_R2DP_T(all_r2dps_over_T, theta, k)
+                # l1_r2dp= get_utility_r2dp(theta, k)
                 if STD_R2DP_MIN>l1_r2dp:
                     STD_R2DP_MIN=l1_r2dp
                     std_gause.update({'k':k, 'theta':theta, 'l1':STD_R2DP_MIN})
