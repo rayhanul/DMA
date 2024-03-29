@@ -166,11 +166,11 @@ def get_utility_gaussian(time, sigma):
 
 def mgf_gamma(theta, k, t):
     """
-    return the moment generating function of a gamma distribution. 
+    return the moment generating function of a gamma distribution for negative t. 
     """
-    if theta==1.0 or theta ==1:
-        theta=theta+0.1
-    return (1 - t * theta)**(-k) 
+    # if theta==1.0 or theta ==1:
+    #     theta=theta+0.1
+    return (1 + t * theta)**(-k) 
     
 def get_utility_r2dp(theta, k):
     """
@@ -182,19 +182,28 @@ def get_utility_r2dp(theta, k):
 
     return integral_value
 
+def get_product_gamma_mgf(history, x, k, theta):
+    t_gamma=mgf_gamma(theta, k, x)
+    all_mgf_gammas=1
+    for key, val in history.items():
+        all_mgf_gammas *= mgf_gamma(val["theta"], val["k"], x)
+    all_mgf_gammas *=t_gamma
 
+    return all_mgf_gammas
+ 
 def get_utility_R2DP_T(history, theta, k):
-       
-    def get_T_times_gamma(history, x, k, theta):
+
+    # def get_T_times_gamma(history, x, k, theta):
       
-        values = get_utility_r2dp(theta, k)
+    #     values = get_utility_r2dp(theta, k)
         
-        integral_values=[get_utility_r2dp(val["theta"], val["k"]) for key, val in history.items()]
-        prod = np.prod(integral_values)
-        return values * prod 
+    #     integral_values=[get_utility_r2dp(val["theta"], val["k"]) for key, val in history.items()]
+    #     prod = np.prod(integral_values)
+    #     return values * prod 
     
 
-    integral_value = get_T_times_gamma(history, 1, k, theta)
+    # integral_value = get_T_times_gamma(history, 1, k, theta)
+    integral_value, error_estimate = integrate.quad(lambda t: get_product_gamma_mgf(history, t, k, theta), 0, np.inf)
     return integral_value 
 
 
