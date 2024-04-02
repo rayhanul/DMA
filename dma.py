@@ -259,7 +259,25 @@ def get_epsilon_utility_Gaussian(t, sigma, delta):
 
     return epsilon, utility 
 
+def run_R2DP_Until_Budget(budget, Ks, THETAs, delta):
 
+    epsilon_cost=0
+    time =1
+    while epsilon_cost < budget:
+        STD_R2DP_MIN = float('inf') 
+        K_THETA= itertools.product(Ks, THETAs)
+        std_gause={}
+        for k, theta in K_THETA:
+            epsilon_R2DP, min_alpha = get_epsilon_R2DP_T(time, results, DEFAULT_ALPHAS, theta, k, delta)
+            l1_r2dp= get_utility_R2DP_T(results, theta, k)
+            if STD_R2DP_MIN>l1_r2dp:
+                STD_R2DP_MIN=l1_r2dp
+                std_gause.update({'k':k, 'theta':theta, 'l1':STD_R2DP_MIN, 'epsilon': epsilon_R2DP})
+    
+        results.update({time:std_gause})
+        time = time+1
+
+    return results
 
 def get_comparison_Gaussian_R2DP(num_iteration, sigma, delta):
     result={}
@@ -311,6 +329,10 @@ if __name__=="__main__":
 
     # ep, utili  = get_epsilon_utility_R2DP(T, K, THETA, DELTA)
 
+    # ep, utili  = get_epsilon_utility_R2DP(T, K, THETA, DELTA)
+
+    ep_gaussian, util_gaussian  = get_epsilon_utility_Gaussian(T, K, THETA, DELTA)
+
 
     results=get_comparison_Gaussian_R2DP(T, SIGMA, DELTA)
 
@@ -321,9 +343,9 @@ if __name__=="__main__":
     # plot_epsilon_R2DP_Gaussian(epsilon_r2dps, epsilon_gaussian, time)
 
     # plotting privacy 
-    l1_r2dps=[ values['l1_r2dp'] for key, values in results.items()]
-    l1_gaussian=[ values['l1_Gaussian'] for key, values in results.items()]
-    time=[i for i in range(1, T)]
-    plot_epsilon_R2DP_Gaussian(l1_r2dps, l1_gaussian, time)
+    # l1_r2dps=[ values['l1_r2dp'] for key, values in results.items()]
+    # l1_gaussian=[ values['l1_Gaussian'] for key, values in results.items()]
+    # time=[i for i in range(1, T)]
+    # plot_epsilon_R2DP_Gaussian(l1_r2dps, l1_gaussian, time)
 
 
