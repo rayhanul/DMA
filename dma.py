@@ -254,8 +254,8 @@ def get_epsilon_utility_R2DP(num_t, Ks, THETAs, delta):
 def get_epsilon_utility_Gaussian(t, sigma, delta):
 
     epsilon=get_epsilon_gaussian(t, sigma, delta)
-    sigma = get_optimum_sigma_gaussian(t, epsilon, delta)
-    utility=get_utility_Gaussian(t, sigma)
+    sigma_optimal = get_optimum_sigma_gaussian(t, epsilon, delta)
+    utility=get_utility_Gaussian(t, sigma_optimal)
 
     return epsilon, utility 
 
@@ -331,16 +331,16 @@ if __name__=="__main__":
 
     # ep, utili  = get_epsilon_utility_R2DP(T, K, THETA, DELTA)
 
-    ep_gaussian, util_gaussian  = get_epsilon_utility_Gaussian(T, K, THETA, DELTA)
+    # ep_gaussian, util_gaussian  = get_epsilon_utility_Gaussian(T, SIGMA, DELTA)
 
 
     results=get_comparison_Gaussian_R2DP(T, SIGMA, DELTA)
 
     # plotting privacy 
-    # epsilon_r2dps=[ values['epsilon_r2dp'] for key, values in results.items()]
-    # epsilon_gaussian=[ values['epsilon_Gaussian'] for key, values in results.items()]
-    # time=[i for i in range(1, T)]
-    # plot_epsilon_R2DP_Gaussian(epsilon_r2dps, epsilon_gaussian, time)
+    epsilon_r2dps=[ values['epsilon_r2dp'] for key, values in results.items()]
+    epsilon_gaussian=[ values['epsilon_Gaussian'] for key, values in results.items()]
+    time=[i for i in range(1, T)]
+    plot_epsilon_R2DP_Gaussian(epsilon_r2dps, epsilon_gaussian, time)
 
     # plotting privacy 
     # l1_r2dps=[ values['l1_r2dp'] for key, values in results.items()]
