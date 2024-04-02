@@ -67,18 +67,18 @@ DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 #     l1_r2dp, _ = integrate.quad(lambda x: get_product_M_T_times(M(x, k, theta), t), 0, 1/theta)
 #     return l1_r2dp
 
-def get_product_T(t, alpha, theta, k):
+# def get_product_T(t, alpha, theta, k):
 
-    values=[ (1-((alpha-1) * theta))**(-k) for t1 in range(1,t+1)]
-    return np.prod(values)
+#     values=[ (1-((alpha-1) * theta))**(-k) for t1 in range(1,t+1)]
+#     return np.prod(values)
     
-def get_log_value(t, alpha, theta, k, DELTA):
+# def get_log_value(t, alpha, theta, k, DELTA):
 
-    value=(alpha/((2 * alpha) -1)) * get_product_T(t, alpha, theta, k) + (np.log((1/DELTA)))/(alpha-1) 
-    if value <=0:
-        return 1
-    val= np.log(value)
-    return val 
+#     value=(alpha/((2 * alpha) -1)) * get_product_T(t, alpha, theta, k) + (np.log((1/DELTA)))/(alpha-1) 
+#     if value <=0:
+#         return 1
+#     val= np.log(value)
+#     return val 
 
 
 # def get_minimum_for_alphas_T(t, DEFAULT_ALPHAS, theta, k, DELTA):
@@ -92,7 +92,11 @@ def get_log_value(t, alpha, theta, k, DELTA):
 
 
 def get_epsilon_R2DP_T(t, history, default_alphas, theta, k, DELTA):
-
+    """
+    Computed as \min_{\alpha\in 2:200} \frac{1}{\alpha-1} \log 
+    \left[  \frac{\alpha}{2\alpha-1} \prod_{t=1}^T (1-(\alpha-1)\theta_t)^{-k_t} 
+    + \frac{\log (1/\delta)}{\alpha-1}\right]
+    """
     def inner_gamma(alpha, k, theta):
         """
         return (1-((\alpha-1) * theta))^(-k)
@@ -103,18 +107,16 @@ def get_epsilon_R2DP_T(t, history, default_alphas, theta, k, DELTA):
         log_value=np.float128(0.0)
         values=val= (1/(alpha-1)) 
         log_value= np.multiply(alpha/((2 * alpha) -1), inner_gamma(alpha, k, theta)) 
-        if len(history)>0:
+        if len(history) >0 and t>1:
             for key, val in history.items():
                 log_value = np.multiply(log_value, inner_gamma(alpha, val["k"], val["theta"]))
             log_value += (np.log((1/DELTA)))/(alpha-1)
 
-            if log_value <=0:
-                log_value=1e-10
-            log_output=np.log(log_value)
-            values =np.multiply(values, log_output)
+        # if log_value <=0:
+        #     log_value=10**(-10)
 
-        values+= (np.log((1/DELTA)))/(alpha-1) 
-
+        log_output=np.log(log_value)
+        values =np.multiply(values, log_output)
         return values
     
     all_epsilon_values=[ get_epsilon(alpha, k, theta, DELTA) for alpha in default_alphas]
@@ -167,7 +169,7 @@ def get_optimum_sigma_gaussian(time, epsilon_bound, delta):
 
     return max(value_1, value_2)
 
-def get_utility_gaussian(time, sigma):
+def get_utility_Gaussian(time, sigma):
     """
     return l1 utility of gaussian mechanism.
     """
@@ -231,16 +233,70 @@ def get_optimal_k_theta():
 
     return all_r2dps_over_T
 
+def get_epsilon_utility_R2DP(num_t, Ks, THETAs, delta):
+    
+    results={}
+    for t in range(1,num_t):
+        STD_R2DP_MIN = float('inf') 
+        K_THETA= itertools.product(Ks, THETAs)
+        std_gause={}
+        for k, theta in K_THETA:
+            epsilon_R2DP, min_alpha = get_epsilon_R2DP_T(t, results, DEFAULT_ALPHAS, theta, k, delta)
+            l1_r2dp= get_utility_R2DP_T(results, theta, k)
+            if STD_R2DP_MIN>l1_r2dp:
+                STD_R2DP_MIN=l1_r2dp
+                std_gause.update({'k':k, 'theta':theta, 'l1':STD_R2DP_MIN, 'epsilon': epsilon_R2DP})
+        # print(f"t:{t}, k: {std_gause['k']}, theta: {std_gause['theta']}, l1:{std_gause['l1']}, Epsilon:{std_gause['epsilon']}")
+        results.update({t:std_gause})
+    epsilon_utility=results[t]
+    return epsilon_utility["epsilon"], epsilon_utility["l1"]
 
-def plot_r2dps(data):
+def get_epsilon_utility_Gaussian(t, sigma, delta):
 
-    time_series=data.keys()
-    r2dp_series=[item['l1'] for item in data.values()]
+    epsilon=get_epsilon_gaussian(t, sigma, delta)
+    sigma = get_optimum_sigma_gaussian(t, epsilon, delta)
+    utility=get_utility_Gaussian(t, sigma)
 
-    plt.plot(time_series, r2dp_series)
-    plt.xlabel("Time")
-    plt.ylabel("STD_R2dp")
-    # plt.grid(True)
+    return epsilon, utility 
+
+
+
+def get_comparison_Gaussian_R2DP(num_iteration, sigma, delta):
+    result={}
+
+
+    for time in range(1, num_iteration):
+        STD_R2DP_MIN= float('inf') 
+        K_THETA= itertools.product(K, THETA)
+
+        epsilon_star_gaussian=get_epsilon_gaussian(time, sigma, delta)
+        # epsilon_R2DP, min_alpha = get_epsilon_R2DP_T(time, result, DEFAULT_ALPHAS, theta, k, delta)
+        sigma_gaussian = get_optimum_sigma_gaussian(time, epsilon_star_gaussian, delta)
+        l1_Gaussian=get_utility_Gaussian(time, sigma_gaussian)
+        std_gause={}
+        for k, theta in K_THETA:
+            epsilon_R2DP, min_alpha = get_epsilon_R2DP_T(time, result, DEFAULT_ALPHAS, theta, k, delta)
+            l1_r2dp= get_utility_R2DP_T(result, theta, k)
+            
+            if STD_R2DP_MIN>l1_r2dp:
+                STD_R2DP_MIN=l1_r2dp
+                std_gause.update({'k':k, 'theta':theta, 'l1_r2dp':STD_R2DP_MIN, 'epsilon_r2dp': epsilon_R2DP, 'l1_Gaussian':l1_Gaussian, 'epsilon_Gaussian': epsilon_star_gaussian})
+            # print(f"t:{time}, k: {std_gause['k']}, theta: {std_gause['theta']}, l1:{std_gause['l1_r2dp']}, Epsilon:{std_gause['epsilon_r2dp']}")
+        result.update({time:std_gause})
+
+    return result
+
+
+def plot_epsilon_R2DP_Gaussian(r2dp, gaussian, time):
+
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(time, r2dp, '-b', label='R2DP')
+    plt.plot(time, gaussian, '-r', label='Gaussian')
+
+    plt.xlabel("Num of Runs")
+    plt.ylabel("Utility")
+    plt.legend()
     plt.show()
 
 
@@ -249,14 +305,25 @@ def plot_r2dps(data):
 
 if __name__=="__main__":
 
-    alpha_star_gaussian=get_optimal_alpha_gaussian(T, SIGMA, DELTA)
-    epsilon_star_gaussian=get_epsilon_gaussian(T, SIGMA, DELTA)
-    sigma_star_gaussian = get_optimum_sigma_gaussian(T, epsilon_star_gaussian, DELTA)
+    # alpha_star_gaussian=get_optimal_alpha_gaussian(T, SIGMA, DELTA)
+    # epsilon_star_gaussian=get_epsilon_gaussian(T, SIGMA, DELTA)
+    # sigma_star_gaussian = get_optimum_sigma_gaussian(T, epsilon_star_gaussian, DELTA)
 
-    all_r2dps_over_T = get_optimal_k_theta()
+    # ep, utili  = get_epsilon_utility_R2DP(T, K, THETA, DELTA)
 
 
+    results=get_comparison_Gaussian_R2DP(T, SIGMA, DELTA)
 
-    plot_r2dps(all_r2dps_over_T)
+    # plotting privacy 
+    # epsilon_r2dps=[ values['epsilon_r2dp'] for key, values in results.items()]
+    # epsilon_gaussian=[ values['epsilon_Gaussian'] for key, values in results.items()]
+    # time=[i for i in range(1, T)]
+    # plot_epsilon_R2DP_Gaussian(epsilon_r2dps, epsilon_gaussian, time)
+
+    # plotting privacy 
+    l1_r2dps=[ values['l1_r2dp'] for key, values in results.items()]
+    l1_gaussian=[ values['l1_Gaussian'] for key, values in results.items()]
+    time=[i for i in range(1, T)]
+    plot_epsilon_R2DP_Gaussian(l1_r2dps, l1_gaussian, time)
 
 
