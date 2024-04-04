@@ -73,10 +73,7 @@ class DynamicMomentR2DP:
 
     def get_epsilon_R2DP(self, t, k, theta, delta, previous_epsilons):
         """
-        # Computed as \min_{\alpha\in 2:200} \frac{1}{\alpha-1} \log 
-        # \left[  \frac{\alpha}{2\alpha-1} \prod_{t=1}^T (1-(\alpha-1)\theta_t)^{-k_t} 
-        # + \frac{\log (1/\delta)}{\alpha-1}\right]
-
+        Computed as min_{alpha in 2:200} frac{1}{alpha-1} log[  frac{alpha}{2 alpha-1} prod_{t=1}^T (1-(alpha-1)theta_t)^{-k_t} + frac{log (1/delta)}{alpha-1}]
         """
 
         def get_epsilon(alpha, k, theta, delta):
@@ -179,7 +176,7 @@ if __name__=="__main__":
 
         last_value=list(result.values())[-1]
 
-        epsilons_utility.update({delta: {
+        epsilons_utility.update({total_epsilon: {
             'l1_R2DP': last_value["l1_R2DP"], 
             'l1_Gaussian': last_value["l1_Gaussian"]
         }})
@@ -207,9 +204,9 @@ if __name__=="__main__":
 
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
 
-    epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=1)
+    # epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=1)
 
-    plotter.plot_l1_for_different_time(epsilon_utility)
+    # plotter.plot_l1_for_different_time(epsilon_utility)
 
 
 
