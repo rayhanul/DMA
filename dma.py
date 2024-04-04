@@ -11,7 +11,7 @@ DELTA=10**(-5)
 C=1
 SIGMA=1.2
 EPSILON=1.5
-T=15
+T=30
 
 
 K=np.random.randint(1,20,30)  #shape paramter of gamma distribution. 
@@ -46,10 +46,10 @@ def get_random_sample_theta(num_samples):
 
 # THETA=np.round(np.random.uniform(1, 10, 15), 2)
 # THETA=get_random_theta(20)
-THETA=np.round(np.random.uniform(0, 1, 30), 2) 
+THETA=np.round(np.random.uniform(0, 1/199, 30), 5) 
 
-DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
-
+# DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
+DEFAULT_ALPHAS = [x for x in range(2, 200)]
 
 # def get_gaussian_epsilon_T(t, alpha, sigma, delta):
 
@@ -93,9 +93,10 @@ DEFAULT_ALPHAS = [1 + x / 10.0 for x in range(1, 100)] + list(range(12, 64))
 
 def get_epsilon_R2DP_T(t, history, default_alphas, theta, k, DELTA):
     """
-    Computed as \min_{\alpha\in 2:200} \frac{1}{\alpha-1} \log 
-    \left[  \frac{\alpha}{2\alpha-1} \prod_{t=1}^T (1-(\alpha-1)\theta_t)^{-k_t} 
-    + \frac{\log (1/\delta)}{\alpha-1}\right]
+    # Computed as \min_{\alpha\in 2:200} \frac{1}{\alpha-1} \log 
+    # \left[  \frac{\alpha}{2\alpha-1} \prod_{t=1}^T (1-(\alpha-1)\theta_t)^{-k_t} 
+    # + \frac{\log (1/\delta)}{\alpha-1}\right]
+
     """
     def inner_gamma(alpha, k, theta):
         """
@@ -120,7 +121,7 @@ def get_epsilon_R2DP_T(t, history, default_alphas, theta, k, DELTA):
         return values
     
     all_epsilon_values=[ get_epsilon(alpha, k, theta, DELTA) for alpha in default_alphas]
-
+    # all_epsilon_values =[val for val in all_epsilon_values if val > 0]
     min_epsilon_index=np.argmin(all_epsilon_values)
     min_epsilon=all_epsilon_values[min_epsilon_index]
     min_alpha=default_alphas[min_epsilon_index]
@@ -349,3 +350,7 @@ if __name__=="__main__":
     # plot_epsilon_R2DP_Gaussian(l1_r2dps, l1_gaussian, time)
 
 
+    #printing results
+
+    for key, val in results.items():
+        print(f"t:{key} R2DP l1:{val['l1_r2dp']}, Epsilon:{val['epsilon_r2dp']}, Gaussian l1:{val['l1_Gaussian']}, Epsilon:{val['epsilon_Gaussian']}")
