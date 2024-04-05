@@ -8,8 +8,28 @@ class Plotter:
 
     def __init__(self) -> None:
         pass
+    def plot_epsilons_vs_l1(self, key, data, total_epsilon):
 
-    def plot_epsilons_vs_l1(self, key, data):
+        l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
+        l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
+        
+        plt.figure(figsize=(10, 6))
+        plt.plot(key, l1_r2dps, '-b', label='L1 R2DP')
+        plt.plot(key, l1_gaussian, '-r', label='L1 Gaussian')
+
+        plt.xlabel("Time")
+        plt.ylabel(r'$L_1$ metric')
+        plt.title(r"$\epsilon$={0}".format(total_epsilon), fontsize=14, color='blue', fontweight='bold')
+        plt.legend()
+
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name=f"Epsilon {total_epsilon}_vs_l1_{timestamp}.png"
+        plt.savefig(file_name)
+
+        plt.show()
+        plt.close()
+
+    def plot_epsilons_vs_l1(self, key, data, total_epsilon):
 
         l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
         l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
@@ -27,6 +47,7 @@ class Plotter:
         plt.savefig(file_name)
 
         plt.show()
+        plt.close()
 
 
     def plot_delta_vs_l1(self, key, data):

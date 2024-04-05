@@ -100,6 +100,11 @@ class DynamicMomentR2DP:
         
         return min_epsilon, min_alpha
 
+    def get_usefullness_R2DP(self, epsilon, delta, sensitivity=1):
+
+        gamma= (sensitivity/epsilon) * np.log(1/delta)
+        return 1-self.M(-gamma)
+
     def get_R2DP_nosies(self, sigma, delta, total_epsilon):
         """
         @sigma: 
@@ -116,7 +121,7 @@ class DynamicMomentR2DP:
         while epsilon_R2DP <= total_epsilon:
 
             epsilon_Gaussian_t= self.get_epsilon_gaussian(t, sigma, delta)
-            updated_sigma=self.get_optimum_sigma_gaussian(t, epsilon_Gaussian_t, delta)
+            sigma=self.get_optimum_sigma_gaussian(t, epsilon_Gaussian_t, delta)
             l1_R2DP_optimal=float("inf")
 
             for k in self.K:
@@ -129,9 +134,11 @@ class DynamicMomentR2DP:
                         continue
 
                     if epsilon_R2DP_t < epsilon_Gaussian_t:
+
                         l1_R2DP=self.get_l1_R2DP( k, theta, previous_epsilons_utility)
 
-                        l1_Gaussian=self.get_l1_Gaussian(updated_sigma, t) # optimum sigma value based on epsilon
+                        l1_Gaussian=self.get_l1_Gaussian(sigma, t) # optimum sigma value based on epsilon
+
                         if l1_R2DP < l1_R2DP_optimal:
                             l1_R2DP_optimal=l1_R2DP
                             epsilon_R2DP=epsilon_R2DP_t
@@ -141,12 +148,14 @@ class DynamicMomentR2DP:
                                 'alpha': best_alpha,
                                 'l1_R2DP': l1_R2DP_optimal,
                                 'epsilon_R2DP': epsilon_R2DP_t, 
+                                'useful_R2DP': 0, 
                                 'l1_Gaussian': l1_Gaussian,
-                                'epsilon_Gaussian': epsilon_Gaussian_t
+                                'epsilon_Gaussian': epsilon_Gaussian_t ,
+                                'useful_Gaussian':0
                             }})
                         
             t=t+1
-            sigma=updated_sigma 
+
 
         return previous_epsilons_utility
 
@@ -166,22 +175,33 @@ if __name__=="__main__":
     plotter=Plotter()
     # epsilon_utility=dma.get_R2DP_nosies(sigma, delta, total_epsilon=0.5)
 
+    #plot 1 for all T 
+
+    # total_epsilons=[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
+    # epsilons_utility={}
+    # for total_epsilon in total_epsilons:
+    #     result = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
+
+    #     keys=list(result.keys())
+
+    #     plotter.plot_time_vs_l1_for_fixed_epsilon(keys,result, total_epsilon)
+
 
     #plot 1 data preparation ...
 
-    total_epsilons=[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
-    epsilons_utility={}
-    for total_epsilon in total_epsilons:
-        result = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
+    # total_epsilons=[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
+    # epsilons_utility={}
+    # for total_epsilon in total_epsilons:
+    #     result = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
 
-        last_value=list(result.values())[-1]
+    #     last_value=list(result.values())[-1]
 
-        epsilons_utility.update({total_epsilon: {
-            'l1_R2DP': last_value["l1_R2DP"], 
-            'l1_Gaussian': last_value["l1_Gaussian"]
-        }})
+    #     epsilons_utility.update({total_epsilon: {
+    #         'l1_R2DP': last_value["l1_R2DP"], 
+    #         'l1_Gaussian': last_value["l1_Gaussian"]
+    #     }})
 
-    plotter.plot_epsilons_vs_l1(total_epsilons,epsilons_utility)
+    # plotter.plot_epsilons_vs_l1(total_epsilons,epsilons_utility)
 
 
     # plot 2 
