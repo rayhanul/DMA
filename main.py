@@ -86,6 +86,7 @@ if __name__=="__main__":
         epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=1)
 
         plotter.plot_l1_for_different_time(epsilon_utility)
+        plotter.plot_usefulness_for_different_time(epsilon_utility)
 
 
 

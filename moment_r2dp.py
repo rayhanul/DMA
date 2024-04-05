@@ -1,7 +1,7 @@
 import random
 import numpy as np 
 from scipy import integrate
-
+import scipy.stats as stats
 from plotter import Plotter 
 
 
@@ -16,6 +16,10 @@ class DynamicMomentR2DP:
     def get_l1_Gaussian(self, sigma, t):
 
         """
+        sigma: 
+        t: time 
+
+
         return l1 utility of gaussian mechanism.
         """
                 
@@ -35,7 +39,7 @@ class DynamicMomentR2DP:
     def get_optimum_sigma_gaussian(self, time, epsilon_bound, delta):
 
         """
-        return the optimal sigma values 
+        return the optimal sigma values for the Gaussian Mechanism
         """
 
         minus_b=2 * np.sqrt(2 * time * np.log(1/delta))
@@ -49,14 +53,14 @@ class DynamicMomentR2DP:
         
     def M(self, k, theta, x):
         """
-        return return the moment generating function of a gamma distribution for t. 
-        (1-(x * theta))^(-k)
+        return the moment generating function of a gamma distribution for t : (1-(x * theta))^(-k)
         """
+
         return np.power((1- np.multiply(x, theta)), -k)
 
     def get_l1_R2DP(self, k, theta, previous_utility):
         """
-        return l1 utitlity 
+        return l1 utility for R2DP Mechanism 
         """
         def get_product_M(k, theta, x, history):
             # M takes negative value of x
@@ -74,9 +78,15 @@ class DynamicMomentR2DP:
     def get_epsilon_R2DP(self, t, k, theta, delta, previous_epsilons):
         """
         Computed as min_{alpha in 2:200} frac{1}{alpha-1} log[  frac{alpha}{2 alpha-1} prod_{t=1}^T (1-(alpha-1)theta_t)^{-k_t} + frac{log (1/delta)}{alpha-1}]
+        
+        return epsilon value for R2DP Mechanism
         """
 
         def get_epsilon(alpha, k, theta, delta):
+            """
+            This is inline funciton.
+            it calculates frac{1}{alpha-1} log[  frac{alpha}{2 alpha-1} prod_{t=1}^T (1-(alpha-1)theta_t)^{-k_t} + frac{log (1/delta)}{alpha-1}
+            """
             log_value=np.float128(0.0)
             log_value= np.multiply(alpha/((2 * alpha) -1), self.M(k, theta, alpha-1)) 
             if len(previous_epsilons) >0 and t>1:
@@ -100,18 +110,52 @@ class DynamicMomentR2DP:
         
         return min_epsilon, min_alpha
 
-    def get_usefullness_R2DP(self, epsilon, delta, sensitivity=1):
+    def get_usefullness_Gaussian(self, epsilon, delta, sigma, sensitivity=1 ):
 
-        gamma= (sensitivity/epsilon) * np.log(1/delta)
-        return 1-self.M(-gamma)
+        """
+        it calculate usefulness of Gaussian Mechanism as 1- 2 * E(Q(x))
+
+        where Q(x) is the Definition F.1, page 695 of R2DP paper 
+        return the usefulness of Gaussian mechanism 
+        """
+
+        def Q(x):
+            
+            val, _=integrate.quad(lambda u: np.exp(-u**2/2), x, np.inf)
+            return 1/np.sqrt(2 * np.pi) * val 
+        
+        # def gaussian_dist():
+        #     return stats.norm.rvs()
+        
+        def E():
+            # gamma=(sensitivity/epsilon) * np.log(1/delta)
+            gamma = 0.1
+            values = [ random.uniform(0,1) * Q(gamma/sigma) for _ in range(50)]
+
+            return np.mean(values)  
+
+        return  1- 2 * E()
+    
+
+    def get_usefullness_R2DP(self, k, theta, epsilon, delta, sensitivity=1):
+        """
+        return usefulness of R2DP mechanism 
+        """
+        # gamma= (sensitivity/epsilon) * np.log(1/delta)
+        gamma=0.1
+        return 1-self.M(k, theta, -gamma)
 
     def get_R2DP_nosies(self, sigma, delta, total_epsilon):
         """
-        @sigma: 
+        sigma: 
         delta: 
         total_epsilon: budget 
+        
 
-        return all paramters 
+        It captures optimal k, theta, alpha, l1_R2DP, l1_Gaussian and store in a variable 
+
+        
+        return all paramters optimal value 
 
         """
         t=1
@@ -139,6 +183,9 @@ class DynamicMomentR2DP:
 
                         l1_Gaussian=self.get_l1_Gaussian(sigma, t) # optimum sigma value based on epsilon
 
+                        usefulness_R2DP=self.get_usefullness_R2DP(k, theta, epsilon_R2DP_t, delta)
+                        usefulness_Gaussian=self.get_usefullness_Gaussian(epsilon_Gaussian_t, delta, sigma)
+
                         if l1_R2DP < l1_R2DP_optimal:
                             l1_R2DP_optimal=l1_R2DP
                             epsilon_R2DP=epsilon_R2DP_t
@@ -148,10 +195,10 @@ class DynamicMomentR2DP:
                                 'alpha': best_alpha,
                                 'l1_R2DP': l1_R2DP_optimal,
                                 'epsilon_R2DP': epsilon_R2DP_t, 
-                                'useful_R2DP': 0, 
+                                'useful_R2DP': usefulness_R2DP, 
                                 'l1_Gaussian': l1_Gaussian,
                                 'epsilon_Gaussian': epsilon_Gaussian_t ,
-                                'useful_Gaussian':0
+                                'useful_Gaussian':usefulness_Gaussian
                             }})
                         
             t=t+1

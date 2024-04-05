@@ -8,6 +8,8 @@ class Plotter:
 
     def __init__(self) -> None:
         pass
+
+
     def plot_time_vs_l1_for_fixed_epsilon(self, key, data, total_epsilon):
 
         l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
@@ -115,6 +117,27 @@ class Plotter:
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         file_name=f"Time_vs_Utility_{timestamp}.png"
+        plt.savefig(file_name)
+
+        plt.show()
+
+    def plot_usefulness_for_different_time(self, data):
+
+        useful_r2dps=[ values['useful_R2DP'] for key, values in data.items()]
+        useful_gaussian=[ values['useful_Gaussian'] for key, values in data.items()]
+        
+        key=data.keys()
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(key, useful_r2dps, '-b', label='Usefulness R2DP')
+        plt.plot(key, useful_gaussian, '-r', label='Usefulness Gaussian')
+
+        plt.xlabel("Time")
+        plt.ylabel("Usefulness")
+        plt.legend()
+
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name=f"Time_vs_Usefulness_{timestamp}.png"
         plt.savefig(file_name)
 
         plt.show()
