@@ -8,7 +8,7 @@ class Plotter:
 
     def __init__(self) -> None:
         pass
-    def plot_epsilons_vs_l1(self, key, data, total_epsilon):
+    def plot_time_vs_l1_for_fixed_epsilon(self, key, data, total_epsilon):
 
         l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
         l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
@@ -47,7 +47,34 @@ class Plotter:
         plt.savefig(file_name)
 
         plt.show()
-        plt.close()
+
+    def plot_bar_char_epsilons_vs_l1(self, key, data):
+
+        l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
+        l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
+        
+        bar_width=0.10
+        r1 = np.arange(len(l1_r2dps))
+        r2 = [x + bar_width for x in r1]
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(r1, l1_r2dps, color='blue', width=bar_width, edgecolor='grey', label='R2DP')
+        plt.bar(r2, l1_gaussian, color='green', width=bar_width, edgecolor='grey', label='Gaussian')
+
+
+        plt.xlabel(r"$\epsilon$")
+        plt.xticks([r + bar_width/2 for r in range(len(key))], key)
+        plt.ylabel(r'$L_1$ metric')
+        plt.title(r"$\epsilon$ vs $l_1$ metric", fontsize=14, color='blue', fontweight='bold')
+        plt.legend()
+
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name=f"bar_char_epsilons_vs_l1_{timestamp}.png"
+        plt.savefig(file_name)
+
+
+
+        plt.show()
 
 
     def plot_delta_vs_l1(self, key, data):
