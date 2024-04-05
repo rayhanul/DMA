@@ -30,7 +30,7 @@ if __name__=="__main__":
     # 4 : default behavior which plot l1 for differnet time
 
     
-    type_plot=2 
+    type_plot=3
     #plot 1 for all T 
     if type_plot==1:
         total_epsilons=[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
@@ -74,10 +74,14 @@ if __name__=="__main__":
             last_value=list(result.values())[-1]
             delta_utility.update({delta: {
                 'l1_R2DP': last_value["l1_R2DP"], 
-                'l1_Gaussian': last_value["l1_Gaussian"]
+                'l1_Gaussian': last_value["l1_Gaussian"], 
+                'useful_R2DP': last_value["useful_R2DP"], 
+                'useful_Gaussian': last_value["useful_Gaussian"]
             }})
         
         plotter.plot_delta_vs_l1(deltas,delta_utility)
+
+        plotter.plot_delta_vs_usefulness(deltas,delta_utility)
 
     
     else :

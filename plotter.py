@@ -90,7 +90,7 @@ class Plotter:
         plt.plot(key, l1_r2dps, '-b', label='L1 R2DP')
         plt.plot(key, l1_gaussian, '-r', label='L1 Gaussian')
 
-        plt.xlabel("Delta")
+        plt.xlabel(r"$\delta$")
         plt.ylabel("Utility")
         plt.legend()
 
@@ -99,6 +99,27 @@ class Plotter:
         plt.savefig(file_name)
 
         plt.show()
+
+        
+    def plot_delta_vs_usefulness(self, key, data):
+
+        usefulness_r2dps=[ values['useful_R2DP'] for key, values in data.items()]
+        usefulness_gaussian=[ values['useful_Gaussian'] for key, values in data.items()]
+        
+        key=np.log(key)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(key, usefulness_r2dps, '-b', label='Usefulness R2DP')
+        plt.plot(key, usefulness_gaussian, '-r', label='Usefulness Gaussian')
+
+        plt.xlabel(r"$\delta$")
+        plt.ylabel("Usefulness")
+        plt.legend()
+
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name=f"delta_vs_usefulness_{timestamp}.png"
+        plt.savefig(file_name)
+
 
     def plot_l1_for_different_time(self, data):
 
