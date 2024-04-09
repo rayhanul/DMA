@@ -100,15 +100,30 @@ class DynamicMomentR2DP:
         
         alphas_less_than_1_over_delta= [alpha for alpha in self.DEFAULT_ALPHAS if alpha < 1/theta]
 
+        # if len(alphas_less_than_1_over_delta) ==0:
+        #     alphas_less_than_1_over_delta=[random.uniform(0.0001, 1/theta) for _ in range(10)]
+
+
         all_epsilon_values=[ get_epsilon(alpha, k, theta, delta) for alpha in alphas_less_than_1_over_delta]
         
         positive_epsilons = [(value, idx) for idx, value in enumerate(all_epsilon_values) if value > 0]
 
         if not positive_epsilons:
-            return None, None  
-        min_epsilon, min_alpha = min(positive_epsilons, key=lambda x: x[0])
+            if len(previous_epsilons)>0:
+                epsilon_upto_t= np.sum([values['epsilon_R2DP'] for key, values in previous_epsilons.items()])
+                all_alphas=[values['alpha'] for key, values in previous_epsilons.items()]
+                last_alpha=all_alphas[-1]
+                # In case no positive epsilon found, and we have previous epsilons, we sum up and select the last alpha 
+                return epsilon_upto_t,   last_alpha 
+            return None, None 
         
-        return min_epsilon, min_alpha
+        min_epsilon, min_alpha = min(positive_epsilons, key=lambda x: x[0])
+
+        epsilon_upto_t=0
+        if len(previous_epsilons)>0:
+            epsilon_upto_t= np.sum([values['epsilon_R2DP'] for key, values in previous_epsilons.items()])
+        total_epsilon=epsilon_upto_t + min_epsilon 
+        return total_epsilon, min_alpha
 
     def get_usefullness_Gaussian(self, epsilon, delta, sigma, sensitivity=1 ):
 
@@ -167,7 +182,7 @@ class DynamicMomentR2DP:
             epsilon_Gaussian_t= self.get_epsilon_gaussian(t, sigma, delta)
             sigma=self.get_optimum_sigma_gaussian(t, epsilon_Gaussian_t, delta)
             l1_R2DP_optimal=float("inf")
-
+            best_params={}
             for k in self.K:
 
                 for theta in self.THETA:
@@ -189,7 +204,7 @@ class DynamicMomentR2DP:
                         if l1_R2DP < l1_R2DP_optimal:
                             l1_R2DP_optimal=l1_R2DP
                             epsilon_R2DP=epsilon_R2DP_t
-                            previous_epsilons_utility.update({t:{
+                            best_params={
                                 'k':k, 
                                 'theta':theta, 
                                 'alpha': best_alpha,
@@ -199,10 +214,21 @@ class DynamicMomentR2DP:
                                 'l1_Gaussian': l1_Gaussian,
                                 'epsilon_Gaussian': epsilon_Gaussian_t ,
                                 'useful_Gaussian':usefulness_Gaussian
-                            }})
-                        
+                                }
+                            # previous_epsilons_utility.update({t:{
+                            #     'k':k, 
+                            #     'theta':theta, 
+                            #     'alpha': best_alpha,
+                            #     'l1_R2DP': l1_R2DP_optimal,
+                            #     'epsilon_R2DP': epsilon_R2DP_t, 
+                            #     'useful_R2DP': usefulness_R2DP, 
+                            #     'l1_Gaussian': l1_Gaussian,
+                            #     'epsilon_Gaussian': epsilon_Gaussian_t ,
+                            #     'useful_Gaussian':usefulness_Gaussian
+                            # }})
+            if len(best_params)>0:
+                previous_epsilons_utility.update({t:best_params})                       
             t=t+1
-
 
         return previous_epsilons_utility
 

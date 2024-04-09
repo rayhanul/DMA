@@ -30,16 +30,17 @@ if __name__=="__main__":
     # 4 : default behavior which plot l1 for differnet time
 
     
-    type_plot=3
+    type_plot=6
     #plot 1 for all T 
     if type_plot==1:
-        total_epsilons=[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
+        #  0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3
+        total_epsilons=[0.5, 0.75, 1, 1.25, 1.5]
         epsilons_utility={}
         for total_epsilon in total_epsilons:
             result = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
 
             keys=list(result.keys())
-
+            
             plotter.plot_time_vs_l1_for_fixed_epsilon(keys,result, total_epsilon)
 
 
@@ -59,7 +60,7 @@ if __name__=="__main__":
                 'l1_Gaussian': last_value["l1_Gaussian"]
             }})
 
-        # plotter.plot_epsilons_vs_l1(total_epsilons,epsilons_utility)
+        plotter.plot_epsilons_vs_l1(total_epsilons,epsilons_utility)
         plotter.plot_bar_char_epsilons_vs_l1(total_epsilons, epsilons_utility)
 
     elif type_plot==3: 
@@ -87,9 +88,10 @@ if __name__=="__main__":
     else :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
 
-        epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=1)
+        epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=30)
 
         plotter.plot_l1_for_different_time(epsilon_utility)
+        plotter.plot_epsilon_for_different_time(epsilon_utility)
         plotter.plot_usefulness_for_different_time(epsilon_utility)
 
 
