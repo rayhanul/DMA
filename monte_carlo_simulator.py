@@ -15,7 +15,7 @@ class MonteCarlo:
         
 
         results=[]
-        for _ in range(self.trails):
+        for iter in range(self.trails):
             sigma = np.random.gamma(*gamma_params['sigma'])
             delta = np.random.gamma(*gamma_params['delta'])
             total_epsilon = np.random.gamma(*gamma_params['total_epsilon'])
@@ -24,6 +24,7 @@ class MonteCarlo:
 
             results.append(result)
 
+            print(f"Iteration : {iter}, epsilon R2DP: {result["epsilon_R2DP"]}, epsilon Gaussian: {result["epsilon_Gaussin"]}")
         return results
 
 
@@ -42,4 +43,7 @@ if __name__=="__main__":
     monte_carlo = MonteCarlo(num_trails)
 
     simulation_results = monte_carlo.simulate(gamma_params)
+
+
+
 
