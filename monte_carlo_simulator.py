@@ -17,14 +17,15 @@ class MonteCarlo:
         results=[]
         for iter in range(self.trails):
             sigma = np.random.gamma(*gamma_params['sigma'])
-            delta = np.random.gamma(*gamma_params['delta'])
+            # delta = np.random.gamma(*gamma_params['delta'])
+            delta=10**(-5)
             total_epsilon = np.random.gamma(*gamma_params['total_epsilon'])
 
             result = dynamic_r2dp.get_R2DP_nosies(sigma, delta, total_epsilon)
 
             results.append(result)
-
-            print(f"Iteration : {iter}, epsilon R2DP: {result["epsilon_R2DP"]}, epsilon Gaussian: {result["epsilon_Gaussin"]}")
+            last_res=list(result.values())[-1]
+            print(f"Iter:{iter}, sigma: {round(sigma,2)}, budget:{round(total_epsilon,2)} R2DP epsilon:{round(last_res["epsilon_R2DP"],5)}, l1: {round(last_res["l1_R2DP"],5)}, Gaussin epsilon:{round(last_res["epsilon_Gaussian"],5)}, l1:{round(last_res["l1_Gaussian"],5)}")
         return results
 
 
