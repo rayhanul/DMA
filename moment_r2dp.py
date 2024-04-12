@@ -8,7 +8,7 @@ from plotter import Plotter
 class DynamicMomentR2DP:
 
     def __init__(self, number_paramters):
-        self.DEFAULT_ALPHAS= [x for x in range(2, 200)]
+        self.DEFAULT_ALPHAS= [x for x in range(2, 50)]
         self.K=np.random.randint(1,20,number_paramters)
         self.THETA=np.linspace(0.001, 10, number_paramters)
         
@@ -57,31 +57,59 @@ class DynamicMomentR2DP:
         """
 
         return np.power((1- np.multiply(alpha, theta)), -k)
+    
 
-    def get_l1_R2DP(self, k, theta, previous_utility):
-        """
-        return l1 utility for R2DP Mechanism 
-        """
-        def get_product_M(k, theta, x, history):
-            # M takes negative value of x
-            t_gamma=self.M(k, theta, -x)
-            all_mgf_gammas=1
-            for key, val in history.items():
-                all_mgf_gammas *= self.M(val["k"], val["theta"], -x)
-            all_mgf_gammas *=t_gamma
+    def get_l1_R2DP(self, t, k, theta, previous_utility):
+            """
+            return l1 utility for R2DP Mechanism 
+            """
 
-            return all_mgf_gammas
+            def integrand(x, k_list, theta_list):
+                product=1 
+                for k, theta in zip(k_list, theta_list):
+                    product *= self.M(k,theta, -x)
+                return product
+            
+            k_list= [values['k'] for key, values in previous_utility.items()]
+            k_list.append(k)
+            theta_list= [values['theta'] for key, values in previous_utility.items()]
+            theta_list.append(theta)
+
+            integral_value, error_estimate = integrate.quad(integrand, 0, np.inf, args=(k_list, theta_list))
+            l1_R2DP_upto_t=0
+            if len(previous_utility)>0:
+                l1_R2DP_upto_t= np.sum([values['l1_R2DP'] for key, values in previous_utility.items()])
+            total_l1= integral_value + l1_R2DP_upto_t
+
+            return total_l1/t 
+
+    # def get_l1_R2DP(self, t, k, theta, previous_utility):
+    #     """
+    #     return l1 utility for R2DP Mechanism 
+    #     """
+    #     def get_product_M(k, theta, x, history):
+    #         # M takes negative value of x
+    #         t_gamma=self.M(k, theta, -x)
+    #         all_mgf_gammas=1
+    #         for key, val in history.items():
+    #             all_mgf_gammas *= self.M(val["k"], val["theta"], -x)
+    #         all_mgf_gammas *=t_gamma
+
+    #         return all_mgf_gammas
         
-        integral_value, error_estimate = integrate.quad(lambda t: get_product_M(k, theta, t, previous_utility), 0, np.inf)
-        l1_R2DP_upto_t=0
-        if len(previous_utility)>0:
-            l1_R2DP_upto_t= np.sum([values['l1_R2DP'] for key, values in previous_utility.items()])
+    #     integral_value, error_estimate = integrate.quad(lambda t: get_product_M(k, theta, t, previous_utility), 0, np.inf)
+    #     l1_R2DP_upto_t=0
+    #     if len(previous_utility)>0:
+    #         l1_R2DP_upto_t= np.sum([values['l1_R2DP'] for key, values in previous_utility.items()])
+            
 
-            # In case no positive epsilon found, and we have previous epsilons, we sum up and select the last alpha 
+    #         # In case no positive epsilon found, and we have previous epsilons, we sum up and select the last alpha 
 
 
         
-        return integral_value + l1_R2DP_upto_t
+    #     total_l1= integral_value + l1_R2DP_upto_t
+
+    #     return total_l1/t 
 
     def get_epsilon_R2DP(self, t, k, theta, alpha, delta, previous_epsilons):
         """
@@ -208,7 +236,7 @@ class DynamicMomentR2DP:
 
                 if epsilon_R2DP_t < epsilon_Gaussian_t:
 
-                    l1_R2DP=self.get_l1_R2DP( k, theta, previous_epsilons_utility)
+                    l1_R2DP=self.get_l1_R2DP( t, k, theta, previous_epsilons_utility)
 
                     l1_Gaussian=self.get_l1_Gaussian(sigma, t) # optimum sigma value based on epsilon
 
@@ -229,17 +257,6 @@ class DynamicMomentR2DP:
                             'epsilon_Gaussian': epsilon_Gaussian_t ,
                             'useful_Gaussian':usefulness_Gaussian
                             }
-                        # previous_epsilons_utility.update({t:{
-                        #     'k':k, 
-                        #     'theta':theta, 
-                        #     'alpha': best_alpha,
-                        #     'l1_R2DP': l1_R2DP_optimal,
-                        #     'epsilon_R2DP': epsilon_R2DP_t, 
-                        #     'useful_R2DP': usefulness_R2DP, 
-                        #     'l1_Gaussian': l1_Gaussian,
-                        #     'epsilon_Gaussian': epsilon_Gaussian_t ,
-                        #     'useful_Gaussian':usefulness_Gaussian
-                        # }})
             if len(best_params)>0:
                 previous_epsilons_utility.update({t:best_params})                       
             t=t+1

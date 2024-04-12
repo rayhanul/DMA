@@ -147,14 +147,14 @@ class Plotter:
 
     def plot_epsilon_for_different_time(self, data):
 
-        l1_r2dps=[ values['epsilon_R2DP'] for key, values in data.items()]
-        l1_gaussian=[ values['epsilon_Gaussian'] for key, values in data.items()]
+        epsilon_r2dps=[ values['epsilon_R2DP'] for key, values in data.items()]
+        epsilon_gaussian=[ values['epsilon_Gaussian'] for key, values in data.items()]
         
         key=data.keys()
 
         plt.figure(figsize=(10, 6))
-        plt.plot(key, l1_r2dps, '-b', label='Epsilon R2DP')
-        plt.plot(key, l1_gaussian, '-r', label='Epsilon Gaussian')
+        plt.plot(key, epsilon_r2dps, '-b', label='Epsilon R2DP')
+        plt.plot(key, epsilon_r2dps, '-r', label='Epsilon Gaussian')
 
         plt.xlabel("Time")
         plt.ylabel(r"$\epsilon$")

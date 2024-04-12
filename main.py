@@ -16,7 +16,7 @@ from plotter import Plotter
 if __name__=="__main__":
     sigma=1.2
     delta = 10**(-5)
-    num_params=20
+    num_params=5
     dma=DynamicMomentR2DP(num_params)
 
     plotter=Plotter()
@@ -88,7 +88,7 @@ if __name__=="__main__":
     else :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
 
-        epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=30)
+        epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=0.25)
 
         plotter.plot_l1_for_different_time(epsilon_utility)
         plotter.plot_epsilon_for_different_time(epsilon_utility)
