@@ -154,7 +154,7 @@ class Plotter:
 
         plt.figure(figsize=(10, 6))
         plt.plot(key, epsilon_r2dps, '-b', label='Epsilon R2DP')
-        plt.plot(key, epsilon_r2dps, '-r', label='Epsilon Gaussian')
+        plt.plot(key, epsilon_gaussian, '-r', label='Epsilon Gaussian')
 
         plt.xlabel("Time")
         plt.ylabel(r"$\epsilon$")
