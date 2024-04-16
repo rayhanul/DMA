@@ -11,6 +11,7 @@ class DynamicMomentR2DP:
         self.DEFAULT_ALPHAS= [x for x in range(2, 50)]
         self.K=np.random.randint(1,20,number_paramters)
         self.THETA=np.linspace(0.001, 10, number_paramters)
+        self.total_Time=30 
         
 
     def get_l1_Gaussian(self, sigma, t):
@@ -224,10 +225,15 @@ class DynamicMomentR2DP:
         epsilon_R2DP=0
         l1_R2DP=0
         previous_epsilons_utility={}
+        
+        sigma=self.get_optimum_sigma_gaussian(self.total_Time, total_epsilon, delta)
+        print(f"sigma: {sigma}")
         while epsilon_R2DP <= total_epsilon:
 
-            epsilon_Gaussian_t= self.get_epsilon_gaussian(t, sigma, delta)
-            sigma=self.get_optimum_sigma_gaussian(t, epsilon_Gaussian_t, delta)
+            # epsilon_Gaussian_t= self.get_epsilon_gaussian(t, sigma, delta)
+            
+
+            # sigma=self.get_optimum_sigma_gaussian(t, total_epsilon, delta)
             l1_R2DP_optimal=float("inf")
             best_params={}
 
@@ -242,14 +248,14 @@ class DynamicMomentR2DP:
                 if epsilon_R2DP_t==None or epsilon_R2DP_t<0:
                     continue
 
-                if epsilon_R2DP_t < epsilon_Gaussian_t:
+                if epsilon_R2DP_t < (total_epsilon/self.total_Time) * t:
 
                     l1_R2DP=self.get_l1_R2DP( t, k, theta, previous_epsilons_utility)
 
-                    l1_Gaussian=self.get_l1_Gaussian(sigma, t) # optimum sigma value based on epsilon
+                    # l1_Gaussian=self.get_l1_Gaussian(sigma, t) # optimum sigma value based on epsilon
 
 
-                    usefulness_Gaussian=self.get_usefullness_Gaussian(epsilon_Gaussian_t, delta, sigma)
+                    # usefulness_Gaussian=self.get_usefullness_Gaussian(epsilon_Gaussian_t, delta, sigma)
 
                     if l1_R2DP < l1_R2DP_optimal:
                         l1_R2DP_optimal=l1_R2DP
@@ -261,17 +267,20 @@ class DynamicMomentR2DP:
                             'l1_R2DP': l1_R2DP_optimal,
                             'epsilon_R2DP': epsilon_R2DP_t, 
                             'useful_R2DP': 0, 
-                            'l1_Gaussian': l1_Gaussian,
-                            'epsilon_Gaussian': epsilon_Gaussian_t ,
-                            'useful_Gaussian':usefulness_Gaussian
+                            # 'l1_Gaussian': l1_Gaussian,
+                            # 'epsilon_Gaussian': epsilon_Gaussian_t ,
+                            # 'useful_Gaussian':usefulness_Gaussian
                             }
+            
             if len(best_params)>0:
+                print(f"time : {t}, epsilon Gaussin : {0}, epsilon R2DP: {best_params['epsilon_R2DP']}")
                 usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon_R2DP'], delta)
                 best_params['useful_R2DP']=usefulness_R2DP
             if len(best_params)>0:
-                previous_epsilons_utility.update({t:best_params})                       
+                previous_epsilons_utility.update({t:best_params})   
+                              
             t=t+1
-
+            
         return previous_epsilons_utility
 
     # def get_R2DP_nosies(self, sigma, delta, total_epsilon):
