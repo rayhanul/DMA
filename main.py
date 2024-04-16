@@ -30,7 +30,7 @@ if __name__=="__main__":
     # 4 : default behavior which plot l1 for differnet time
 
     
-    type_plot=6
+    type_plot=2
     #plot 1 for all T 
     if type_plot==1:
         #  0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3
@@ -88,7 +88,7 @@ if __name__=="__main__":
     else :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
 
-        epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=0.25)
+        epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=1)
 
         plotter.plot_l1_for_different_time(epsilon_utility)
         plotter.plot_epsilon_for_different_time(epsilon_utility)

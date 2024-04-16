@@ -76,12 +76,12 @@ class DynamicMomentR2DP:
             theta_list.append(theta)
 
             integral_value, error_estimate = integrate.quad(integrand, 0, np.inf, args=(k_list, theta_list))
-            l1_R2DP_upto_t=0
-            if len(previous_utility)>0:
-                l1_R2DP_upto_t= np.sum([values['l1_R2DP'] for key, values in previous_utility.items()])
-            total_l1= integral_value + l1_R2DP_upto_t
+            # l1_R2DP_upto_t=0
+            # if len(previous_utility)>0:
+            #     l1_R2DP_upto_t= np.sum([values['l1_R2DP'] for key, values in previous_utility.items()])
+            # total_l1= integral_value + l1_R2DP_upto_t
 
-            return total_l1/t 
+            return integral_value
 
     # def get_l1_R2DP(self, t, k, theta, previous_utility):
     #     """
@@ -195,7 +195,15 @@ class DynamicMomentR2DP:
         """
         # gamma= (sensitivity/epsilon) * np.log(1/delta)
         gamma=0.1
-        return 1-self.M(k, theta, -gamma)
+        # min_val= np.min([ self.M(k, theta, -gamma) for theta in self.THETA])
+        
+        alphas_less_than_1_over_theta= [alpha for alpha in self.DEFAULT_ALPHAS if alpha < (1/theta)]
+
+        min_val=np.prod([self.M(k, theta, -1* alpha* gamma) for alpha in alphas_less_than_1_over_theta])
+
+
+
+        return 1-min_val
 
     def get_R2DP_nosies(self, sigma, delta, total_epsilon):
         """
@@ -240,7 +248,7 @@ class DynamicMomentR2DP:
 
                     l1_Gaussian=self.get_l1_Gaussian(sigma, t) # optimum sigma value based on epsilon
 
-                    usefulness_R2DP=self.get_usefullness_R2DP(k, theta, epsilon_R2DP_t, delta)
+
                     usefulness_Gaussian=self.get_usefullness_Gaussian(epsilon_Gaussian_t, delta, sigma)
 
                     if l1_R2DP < l1_R2DP_optimal:
@@ -252,11 +260,14 @@ class DynamicMomentR2DP:
                             'alpha': alpha,
                             'l1_R2DP': l1_R2DP_optimal,
                             'epsilon_R2DP': epsilon_R2DP_t, 
-                            'useful_R2DP': usefulness_R2DP, 
+                            'useful_R2DP': 0, 
                             'l1_Gaussian': l1_Gaussian,
                             'epsilon_Gaussian': epsilon_Gaussian_t ,
                             'useful_Gaussian':usefulness_Gaussian
                             }
+            if len(best_params)>0:
+                usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon_R2DP'], delta)
+                best_params['useful_R2DP']=usefulness_R2DP
             if len(best_params)>0:
                 previous_epsilons_utility.update({t:best_params})                       
             t=t+1
