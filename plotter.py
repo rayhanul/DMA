@@ -124,12 +124,12 @@ class Plotter:
         plt.savefig(file_name)
 
 
-    def plot_l1_for_different_time(self, data):
+    def plot_l1_for_different_time(self, r2dp_data, gaussian_data, title):
 
-        l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
-        l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
+        l1_r2dps=[ values['l1'] for key, values in r2dp_data.items()]
+        l1_gaussian=[ values['l1'] for key, values in gaussian_data.items()]
         
-        key=data.keys()
+        key=r2dp_data.keys()
 
         plt.figure(figsize=(10, 6))
         plt.plot(key, l1_r2dps, '-b', label='L1 R2DP')
@@ -141,13 +141,14 @@ class Plotter:
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         file_name=f"Time_vs_Utility_{timestamp}.png"
+        plt.title(title, fontsize=14, color='blue', fontweight='bold')
         plt.savefig(file_name)
 
         plt.show()
 
-    def plot_epsilon_for_different_time(self, data_R2DP, data_Gaussian):
+    def plot_epsilon_for_different_time(self, data_R2DP, data_Gaussian, title):
 
-        epsilon_r2dps=[ values['epsilon_R2DP'] for key, values in data_R2DP.items()]
+        epsilon_r2dps=[ values['epsilon'] for key, values in data_R2DP.items()]
         epsilon_gaussian=[ values['epsilon'] for key, values in data_Gaussian.items()]
         
         key=data_R2DP.keys()
@@ -162,18 +163,19 @@ class Plotter:
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         file_name=f"Time_vs_Epsilon_{timestamp}.png"
+        plt.title(title, fontsize=14, color='blue', fontweight='bold')
         plt.savefig(file_name)
 
         plt.show()
 
 
 
-    def plot_usefulness_for_different_time(self, data):
+    def plot_usefulness_for_different_time(self, r2dp_data, gaussian_data, title):
 
-        useful_r2dps=[ values['useful_R2DP'] for key, values in data.items()]
-        useful_gaussian=[ values['useful_Gaussian'] for key, values in data.items()]
+        useful_r2dps=[ values['useful'] for key, values in r2dp_data.items()]
+        useful_gaussian=[ values['useful'] for key, values in gaussian_data.items()]
         
-        key=data.keys()
+        key=r2dp_data.keys()
 
         plt.figure(figsize=(10, 6))
         plt.plot(key, useful_r2dps, '-b', label='Usefulness R2DP')
@@ -181,6 +183,7 @@ class Plotter:
 
         plt.xlabel("Time")
         plt.ylabel("Usefulness")
+        plt.title(title, fontsize=14, color='blue', fontweight='bold')
         plt.legend()
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")

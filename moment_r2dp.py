@@ -206,6 +206,23 @@ class DynamicMomentR2DP:
 
         return 1-min_val
 
+    def get_Gaussian(self, time, delta, total_epsilon):
+
+        """
+        time- number of iterations R2DP is run
+        total_epsilon-  total budget 
+        delta - 
+        """
+        Gaussian_l1_epsilon_utility={}
+        
+        sigma=self.get_optimum_sigma_gaussian(time, total_epsilon, delta)
+        for time in range(time):
+            Gaussian_l1_epsilon_utility.update({time:{
+                'epsilon':self.get_epsilon_gaussian(time, sigma, delta), 
+                'l1':self.get_l1_Gaussian(sigma, time)}})
+            
+        return Gaussian_l1_epsilon_utility
+
     def get_R2DP_nosies(self, sigma, delta, total_epsilon):
         """
         sigma: 
@@ -264,21 +281,20 @@ class DynamicMomentR2DP:
                             'k':k, 
                             'theta':theta, 
                             'alpha': alpha,
-                            'l1_R2DP': l1_R2DP_optimal,
-                            'epsilon_R2DP': epsilon_R2DP_t, 
+                            'l1': l1_R2DP_optimal,
+                            'epsilon': epsilon_R2DP_t, 
                             'useful_R2DP': 0, 
                             # 'l1_Gaussian': l1_Gaussian,
                             # 'epsilon_Gaussian': epsilon_Gaussian_t ,
                             # 'useful_Gaussian':usefulness_Gaussian
                             }
             
+
             if len(best_params)>0:
-                print(f"time : {t}, epsilon Gaussin : {0}, epsilon R2DP: {best_params['epsilon_R2DP']}")
-                usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon_R2DP'], delta)
-                best_params['useful_R2DP']=usefulness_R2DP
-            if len(best_params)>0:
-                previous_epsilons_utility.update({t:best_params})   
-                              
+                usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon'], delta)
+                best_params['useful']=usefulness_R2DP
+                previous_epsilons_utility.update({t:best_params})  
+
             t=t+1
             
         return previous_epsilons_utility
@@ -356,21 +372,3 @@ class DynamicMomentR2DP:
     #         t=t+1
 
     #     return previous_epsilons_utility
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        

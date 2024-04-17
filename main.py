@@ -17,6 +17,7 @@ if __name__=="__main__":
     sigma=1.2
     delta = 10**(-5)
     num_params=5
+    total_epsilon=1 
     dma=DynamicMomentR2DP(num_params)
 
     plotter=Plotter()
@@ -88,24 +89,28 @@ if __name__=="__main__":
     else :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
         total_epsilon=1
-        epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=1)
+        R2DP_epsilon_utility=dma.get_R2DP_nosies(sigma, delta, total_epsilon)
 
-        times=list(epsilon_utility.keys())[-1]
-
-        all_epsilon_Gaussin= dma.get_epsilon_gaussian(times, sigma, delta)
-        sigma=dma.get_optimum_sigma_gaussian(times, total_epsilon, delta)
-
-        Gaussian_l1_epsilon={}
-        for time in range(times):
-            Gaussian_l1_epsilon.update({time:{
-                'epsilon':dma.get_epsilon_gaussian(time, sigma, delta), 
-                'l1':dma.get_l1_Gaussian(sigma, time)}})
+        times=list(R2DP_epsilon_utility.keys())[-1]
 
 
 
-        # plotter.plot_l1_for_different_time(epsilon_utility)
-        plotter.plot_epsilon_for_different_time(epsilon_utility, Gaussian_l1_epsilon)
-        # plotter.plot_usefulness_for_different_time(epsilon_utility)
+        # all_epsilon_Gaussin= dma.get_epsilon_gaussian(times, sigma, delta)
+        # sigma=dma.get_optimum_sigma_gaussian(times, total_epsilon, delta)
+
+        # Gaussian_l1_epsilon={}
+        # for time in range(times):
+        #     Gaussian_l1_epsilon.update({time:{
+        #         'epsilon':dma.get_epsilon_gaussian(time, sigma, delta), 
+        #         'l1':dma.get_l1_Gaussian(sigma, time)}})
+
+        gaussian_l1_epsilon=dma.get_Gaussian(times, delta, total_epsilon)
+
+        title=r"total $\epsilon$ ={0}, $\delta = {1}$".format(total_epsilon, delta)
+
+        plotter.plot_l1_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
+        plotter.plot_epsilon_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
+        # plotter.plot_usefulness_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
 
 
 
