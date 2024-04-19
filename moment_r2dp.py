@@ -225,12 +225,17 @@ class DynamicMomentR2DP:
             
         return Gaussian_l1_epsilon_utility
 
-    def get_R2DP_nosies(self, sigma, delta, total_epsilon):
+    def get_R2DP_nosies(self, sigma, delta, total_epsilon, budget_spend_pattern="normal", step=0.001):
         """
         sigma: 
         delta: 
         total_epsilon: budget 
         
+        budget_spend_pattern: 
+                normal - 
+                early: spend too much early and reduces spending over time
+                late: increases spending over time 
+
 
         It captures optimal k, theta, alpha, l1_R2DP, l1_Gaussian and store in a variable 
 
@@ -264,10 +269,18 @@ class DynamicMomentR2DP:
 
                 epsilon_R2DP_t = self.get_epsilon_R2DP(t, k, theta, alpha, delta, previous_epsilons_utility )
                 
+                # spending pattern
+
+                if budget_spend_pattern=="late": 
+                    epsilon_R2DP_t=epsilon_R2DP_t+ step * t
+                elif budget_spend_pattern=="early":
+                    epsilon_R2DP_t=epsilon_R2DP_t - step * t
+
+
                 if epsilon_R2DP_t==None or epsilon_R2DP_t<0:
                     continue
 
-                if epsilon_R2DP_t < (total_epsilon/self.total_Time) * t:
+                if epsilon_R2DP_t < (total_epsilon/self.total_Time) * t :
 
                     l1_R2DP=self.get_l1_R2DP( t, k, theta, previous_epsilons_utility)
 

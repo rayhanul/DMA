@@ -40,7 +40,7 @@ class Plotter:
         plt.plot(key, l1_gaussian, '-r', label='L1 Gaussian')
 
         plt.xlabel("Time")
-        plt.ylabel(r'$L_1$ metric')
+        plt.ylabel(r'$l_1$ metric')
         plt.title(r"$\epsilon$={0}".format(total_epsilon), fontsize=14, color='blue', fontweight='bold')
         plt.legend()
 
@@ -63,8 +63,8 @@ class Plotter:
         plt.plot(key, l1_r2dps, '-b', label='L1 R2DP')
         plt.plot(key, l1_gaussian, '-r', label='L1 Gaussian')
 
-        plt.xlabel("Epsilon")
-        plt.ylabel("Utility")
+        plt.xlabel(r"$\epsilon$")
+        plt.ylabel(r"$l_1$ metric")
         plt.legend()
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -89,7 +89,7 @@ class Plotter:
 
         plt.xlabel(r"$\epsilon$")
         plt.xticks([r + bar_width/2 for r in range(len(key))], key)
-        plt.ylabel(r'$L_1$ metric')
+        plt.ylabel(r'$l_1$ metric')
         plt.title(r"$\epsilon$ vs $l_1$ metric", fontsize=14, color='blue', fontweight='bold')
         plt.legend()
 
@@ -114,7 +114,7 @@ class Plotter:
         plt.plot(key, l1_gaussian, '-r', label='L1 Gaussian')
 
         plt.xlabel(r"$\delta$")
-        plt.ylabel("Utility")
+        plt.ylabel(r"$l_1$ metric")
         plt.legend()
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -156,7 +156,7 @@ class Plotter:
         plt.plot(key, l1_gaussian, '-r', label='L1 Gaussian')
 
         plt.xlabel("Time")
-        plt.ylabel("Utility")
+        plt.ylabel(r"$l_1$ metric")
         plt.legend()
 
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
