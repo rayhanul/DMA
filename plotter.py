@@ -54,10 +54,10 @@ class Plotter:
     
 
 
-    def plot_epsilons_vs_l1(self, key, data):
+    def plot_epsilons_vs_l1(self, key, data_R2DP, data_Gaussian):
 
-        l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
-        l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
+        l1_r2dps=[ values['l1'] for key, values in data_R2DP.items()]
+        l1_gaussian=[ values['l1'] for key, values in data_Gaussian.items()]
         
         plt.figure(figsize=(10, 6))
         plt.plot(key, l1_r2dps, '-b', label='L1 R2DP')
@@ -73,10 +73,10 @@ class Plotter:
 
         plt.show()
 
-    def plot_bar_char_epsilons_vs_l1(self, key, data):
+    def plot_bar_char_epsilons_vs_l1(self, key, data_R2DP, data_Gaussian):
 
-        l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
-        l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
+        l1_r2dps=[ values['l1'] for key, values in data_R2DP.items()]
+        l1_gaussian=[ values['l1'] for key, values in data_Gaussian.items()]
         
         bar_width=0.10
         r1 = np.arange(len(l1_r2dps))
@@ -102,10 +102,10 @@ class Plotter:
         plt.show()
 
 
-    def plot_delta_vs_l1(self, key, data):
+    def plot_delta_vs_l1(self, key, data_R2DP, data_Gaussian):
 
-        l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
-        l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
+        l1_r2dps=[ values['l1'] for key, values in data_R2DP.items()]
+        l1_gaussian=[ values['l1'] for key, values in data_Gaussian.items()]
         
         key=np.log(key)
 
@@ -124,10 +124,10 @@ class Plotter:
         plt.show()
 
         
-    def plot_delta_vs_usefulness(self, key, data):
+    def plot_delta_vs_usefulness(self, key, data_R2DP, data_Gaussian):
 
-        usefulness_r2dps=[ values['useful_R2DP'] for key, values in data.items()]
-        usefulness_gaussian=[ values['useful_Gaussian'] for key, values in data.items()]
+        usefulness_r2dps=[ values['usefulP'] for key, values in data_R2DP.items()]
+        usefulness_gaussian=[ values['useful'] for key, values in data_Gaussian.items()]
         
         key=np.log(key)
 

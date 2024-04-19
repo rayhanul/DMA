@@ -31,7 +31,7 @@ if __name__=="__main__":
     # 4 : default behavior which plot l1 for differnet time
 
     
-    type_plot=6
+    type_plot=2
     #plot 1 for all T 
     if type_plot==1:
         #  0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3
@@ -48,42 +48,70 @@ if __name__=="__main__":
     elif type_plot==2:
 
     #plot 1 data preparation ...
-
+        # 
         total_epsilons=[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
-        epsilons_utility={}
+        epsilons_utility_R2DP={}
+        delta_utility_Gaussian={}
         for total_epsilon in total_epsilons:
-            result = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
+            R2DP_data = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
+            
+            last_value_R2DP=list(R2DP_data.values())[-1]
+            time=list(R2DP_data.keys())[-1]
 
-            last_value=list(result.values())[-1]
+            Gaussian_data=dma.get_Gaussian(time, delta, total_epsilon)
+            last_value_Gaussian=list(Gaussian_data.values())[-1]
 
-            epsilons_utility.update({total_epsilon: {
-                'l1_R2DP': last_value["l1_R2DP"], 
-                'l1_Gaussian': last_value["l1_Gaussian"]
+
+            epsilons_utility_R2DP.update({total_epsilon: {
+                'l1': last_value_R2DP["l1"]
             }})
 
-        plotter.plot_epsilons_vs_l1(total_epsilons,epsilons_utility)
-        plotter.plot_bar_char_epsilons_vs_l1(total_epsilons, epsilons_utility)
+
+            delta_utility_Gaussian.update({total_epsilon: {
+                'l1': last_value_Gaussian["l1"]
+            }})
+
+
+
+        plotter.plot_epsilons_vs_l1(total_epsilons,epsilons_utility_R2DP, delta_utility_Gaussian)
+        plotter.plot_bar_char_epsilons_vs_l1(total_epsilons, epsilons_utility_R2DP, delta_utility_Gaussian)
 
     elif type_plot==3: 
     # plot 2 
     # , 
+
+        # , 10**(-20), 10**(-30), 10**(-40)
     
-        deltas = [10**(-2), 10**(-5), 10**(-10), 10**(-15), 10**(-20)]
-        delta_utility={}
+        deltas = [10**(-1), 10**(-5), 10**(-10), 10**(-15)]
+        delta_utility_R2DP={}
+        delta_utility_Gaussian={}
         for delta in deltas:
 
-            result = dma.get_R2DP_nosies(sigma=1.2, delta=delta, total_epsilon=0.5)
-            last_value=list(result.values())[-1]
-            delta_utility.update({delta: {
-                'l1_R2DP': last_value["l1_R2DP"], 
-                'l1_Gaussian': last_value["l1_Gaussian"], 
-                'useful_R2DP': last_value["useful_R2DP"], 
-                'useful_Gaussian': last_value["useful_Gaussian"]
-            }})
-        
-        plotter.plot_delta_vs_l1(deltas,delta_utility)
+            R2DP_epsilon_utility = dma.get_R2DP_nosies(sigma=1.2, delta=delta, total_epsilon=1)
 
-        plotter.plot_delta_vs_usefulness(deltas,delta_utility)
+            time=list(R2DP_epsilon_utility.keys())[-1]
+
+            gaussian_l1_epsilon=dma.get_Gaussian(time, delta, total_epsilon)
+
+            last_value_R2DP=list(R2DP_epsilon_utility.values())[-1]
+
+            last_value_Gaussian=list(gaussian_l1_epsilon.values())[-1]
+
+
+            delta_utility_R2DP.update({delta: {
+                'l1': last_value_R2DP["l1"], 
+                'useful': last_value_R2DP["useful"], 
+            }})
+
+            delta_utility_Gaussian.update({delta: {
+                'l1': last_value_Gaussian["l1"], 
+                'useful': 0, 
+            }})
+
+        
+        plotter.plot_delta_vs_l1(deltas,delta_utility_R2DP, delta_utility_Gaussian)
+
+        # plotter.plot_delta_vs_usefulness(deltas,delta_utility_R2DP, delta_utility_Gaussian)
 
     
     elif type_plot==4 :

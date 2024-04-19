@@ -63,28 +63,28 @@ class DynamicMomentR2DP:
     
 
     def get_l1_R2DP(self, t, k, theta, previous_utility):
-            """
-            return l1 utility for R2DP Mechanism 
-            """
+        """
+        return l1 utility for R2DP Mechanism 
+        """
 
-            def integrand(x, k_list, theta_list):
-                product=1 
-                for k, theta in zip(k_list, theta_list):
-                    product *= self.M(k,theta, -x)
-                return product
-            
-            k_list= [values['k'] for key, values in previous_utility.items()]
-            k_list.append(k)
-            theta_list= [values['theta'] for key, values in previous_utility.items()]
-            theta_list.append(theta)
+        def integrand(x, k_list, theta_list):
+            product=1 
+            for k, theta in zip(k_list, theta_list):
+                product *= self.M(k,theta, -x)
+            return product
+        
+        k_list= [values['k'] for key, values in previous_utility.items()]
+        k_list.append(k)
+        theta_list= [values['theta'] for key, values in previous_utility.items()]
+        theta_list.append(theta)
 
-            integral_value, error_estimate = integrate.quad(integrand, 0, np.inf, args=(k_list, theta_list))
-            # l1_R2DP_upto_t=0
-            # if len(previous_utility)>0:
-            #     l1_R2DP_upto_t= np.sum([values['l1_R2DP'] for key, values in previous_utility.items()])
-            # total_l1= integral_value + l1_R2DP_upto_t
+        integral_value, error_estimate = integrate.quad(integrand, 0, np.inf, args=(k_list, theta_list))
+        # l1_R2DP_upto_t=0
+        # if len(previous_utility)>0:
+        #     l1_R2DP_upto_t= np.sum([values['l1_R2DP'] for key, values in previous_utility.items()])
+        # total_l1= integral_value + l1_R2DP_upto_t
 
-            return integral_value
+        return integral_value
 
     # def get_l1_R2DP(self, t, k, theta, previous_utility):
     #     """
@@ -246,7 +246,7 @@ class DynamicMomentR2DP:
         previous_epsilons_utility={}
         
         sigma=self.get_optimum_sigma_gaussian(self.total_Time, total_epsilon, delta)
-        print(f"sigma: {sigma}")
+        # print(f"sigma: {sigma}")
         while epsilon_R2DP <= total_epsilon:
 
             # epsilon_Gaussian_t= self.get_epsilon_gaussian(t, sigma, delta)
@@ -285,7 +285,7 @@ class DynamicMomentR2DP:
                             'alpha': alpha,
                             'l1': l1_R2DP_optimal,
                             'epsilon': epsilon_R2DP_t, 
-                            'useful_R2DP': 0, 
+                            'useful': 0, 
                             # 'l1_Gaussian': l1_Gaussian,
                             # 'epsilon_Gaussian': epsilon_Gaussian_t ,
                             # 'useful_Gaussian':usefulness_Gaussian
