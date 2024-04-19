@@ -9,6 +9,26 @@ class Plotter:
     def __init__(self) -> None:
         pass
 
+    def plot_r2dp_gaussian_noise(self, r2dp_data, gaussian_data):
+
+        len_keys=len(r2dp_data)
+
+        x_axis=[i for i in range(len_keys)]
+
+        plt.figure()
+        plt.scatter(x_axis, r2dp_data, label='R2DP')
+        plt.scatter(x_axis, gaussian_data, label='Gaussian')
+
+        plt.xlabel('Number of Samples')
+        plt.ylabel('Mean L1 Distance')
+        plt.title('L1 Distance Evaluation')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
+
+        
+
+
 
     def plot_time_vs_l1_for_fixed_epsilon(self, key, data, total_epsilon):
 

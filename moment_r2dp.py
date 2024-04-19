@@ -4,6 +4,8 @@ from scipy import integrate
 import scipy.stats as stats
 from plotter import Plotter 
 
+from scipy.stats import gamma, laplace 
+
 
 class DynamicMomentR2DP:
 
@@ -283,79 +285,42 @@ class DynamicMomentR2DP:
             
         return previous_epsilons_utility
 
-    # def get_R2DP_nosies(self, sigma, delta, total_epsilon):
-    #     """
-    #     sigma: 
-    #     delta: 
-    #     total_epsilon: budget 
-        
 
-    #     It captures optimal k, theta, alpha, l1_R2DP, l1_Gaussian and store in a variable 
+    def get_R2DP_Gaussian_noise(self):
 
-        
-    #     return all paramters optimal value 
+        def laprnd(mu, b, size):
+            return laplace.rvs(loc=mu, scale=b, size=size)
 
-    #     """
+        num_samples=100
+        valid_paramters=[(k, theta, alpha) for alpha in self.DEFAULT_ALPHAS for theta in self.THETA for k in self.K if alpha < (1/theta) and k > ((-1) * (np.log(2*alpha-1)/alpha) / (np.log(1-(alpha-1) * theta)))]
+        R2DP_noise=[]
+        Gaussian_noise=[]
+        for param in valid_paramters: 
 
-    #     valid_paramters=[(k, theta, alpha) for alpha in self.DEFAULT_ALPHAS for theta in self.THETA for k in self.K if alpha < (1/theta) and k > ((-1) * (np.log(2*alpha-1)/alpha) / (np.log(1-(alpha-1) * theta)))]
-    #     t=1
-    #     epsilon_R2DP=0
-    #     l1_R2DP=0
-    #     previous_epsilons_utility={}
-    #     while epsilon_R2DP <= total_epsilon:
+            gamma_sample1 = gamma.rvs(param[0], scale=param[1], size=num_samples)
+            # gamma_sample1 = gamma.rvs(2, scale=1, size=num_samples)
+            # gamma_sample2 = gamma.rvs(k2, scale=theta2, size=ns)
+            # gamma_sample3 = gamma.rvs(k3, scale=theta3, size=ns)
 
-    #         epsilon_Gaussian_t= self.get_epsilon_gaussian(t, sigma, delta)
-    #         sigma=self.get_optimum_sigma_gaussian(t, epsilon_Gaussian_t, delta)
-    #         l1_R2DP_optimal=float("inf")
-    #         best_params={}
-    #         for k in self.K:
+            # Calculate inverses
+            inverse_sum1 = 1. / gamma_sample1
+            # inverse_sum2 = 1. / (gamma_sample1 + gamma_sample2)
+            # inverse_sum3 = 1. / (gamma_sample1 + gamma_sample2 + gamma_sample3)
 
-    #             for theta in self.THETA:
+            # Generate Laplace samples
+            laplace_sample1 = laprnd(0, inverse_sum1, num_samples)
+            gaussian_sample=np.random.laplace(0, inverse_sum1, num_samples)
+            # laplace_sample2 = laprnd(0, inverse_sum2, ns)
+            # laplace_sample3 = laprnd(0, inverse_sum3, ns)
 
-    #                 epsilon_R2DP_t, best_alpha = self.get_epsilon_R2DP(t, k, theta, delta, previous_epsilons_utility )
-                    
-    #                 if epsilon_R2DP_t==None:
-    #                     continue
+            # Compute L1 distances
+            R2DP_noise.append(np.mean(np.abs(laplace_sample1)))
+            Gaussian_noise.append(np.mean(np.abs(gaussian_sample)))
 
-    #                 if epsilon_R2DP_t < epsilon_Gaussian_t:
+            # y2.append(np.mean(np.abs(laplace_sample2)))
+            # y3.append(np.mean(np.abs(laplace_sample3)))         
 
-    #                     l1_R2DP=self.get_l1_R2DP( k, theta, previous_epsilons_utility)
-
-    #                     l1_Gaussian=self.get_l1_Gaussian(sigma, t) # optimum sigma value based on epsilon
-
-    #                     usefulness_R2DP=self.get_usefullness_R2DP(k, theta, epsilon_R2DP_t, delta)
-    #                     usefulness_Gaussian=self.get_usefullness_Gaussian(epsilon_Gaussian_t, delta, sigma)
-
-    #                     if l1_R2DP < l1_R2DP_optimal:
-    #                         l1_R2DP_optimal=l1_R2DP
-    #                         epsilon_R2DP=epsilon_R2DP_t
-    #                         best_params={
-    #                             'k':k, 
-    #                             'theta':theta, 
-    #                             'alpha': best_alpha,
-    #                             'l1_R2DP': l1_R2DP_optimal,
-    #                             'epsilon_R2DP': epsilon_R2DP_t, 
-    #                             'useful_R2DP': usefulness_R2DP, 
-    #                             'l1_Gaussian': l1_Gaussian,
-    #                             'epsilon_Gaussian': epsilon_Gaussian_t ,
-    #                             'useful_Gaussian':usefulness_Gaussian
-    #                             }
-    #                         # previous_epsilons_utility.update({t:{
-    #                         #     'k':k, 
-    #                         #     'theta':theta, 
-    #                         #     'alpha': best_alpha,
-    #                         #     'l1_R2DP': l1_R2DP_optimal,
-    #                         #     'epsilon_R2DP': epsilon_R2DP_t, 
-    #                         #     'useful_R2DP': usefulness_R2DP, 
-    #                         #     'l1_Gaussian': l1_Gaussian,
-    #                         #     'epsilon_Gaussian': epsilon_Gaussian_t ,
-    #                         #     'useful_Gaussian':usefulness_Gaussian
-    #                         # }})
-    #         if len(best_params)>0:
-    #             previous_epsilons_utility.update({t:best_params})                       
-    #         t=t+1
-
-    #     return previous_epsilons_utility
+        return R2DP_noise, Gaussian_noise 
 
 
 

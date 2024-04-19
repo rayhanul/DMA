@@ -85,7 +85,7 @@ if __name__=="__main__":
         plotter.plot_delta_vs_usefulness(deltas,delta_utility)
 
     
-    else :
+    elif type_plot==4 :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
         total_epsilon=1
         epsilon_utility=dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=1)
@@ -106,6 +106,12 @@ if __name__=="__main__":
         # plotter.plot_l1_for_different_time(epsilon_utility)
         plotter.plot_epsilon_for_different_time(epsilon_utility, Gaussian_l1_epsilon)
         # plotter.plot_usefulness_for_different_time(epsilon_utility)
+
+    else: 
+        r2dp, gaussian = dma.get_R2DP_Gaussian_noise()
+
+        plotter.plot_r2dp_gaussian_noise(r2dp, gaussian)
+    
 
 
 
