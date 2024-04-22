@@ -31,25 +31,29 @@ if __name__=="__main__":
     # 4 : default behavior which plot l1 for differnet time
 
     
-    type_plot=3
+    type_plot=4
     #plot 1 for all T 
     if type_plot==1:
-        #  0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3
-        total_epsilons=[0.5, 0.75, 1, 1.25, 1.5]
+        #  0.75, 1, 1.25, 1.5, 
+        total_epsilons=[0.1, 0.5, 1, 1.5, 2, 4, 8, 16]
         epsilons_utility={}
         for total_epsilon in total_epsilons:
-            result = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
+            R2DP_data = dma.get_R2DP_nosies(sigma=1.2, delta=10**(-5), total_epsilon=total_epsilon)
 
-            keys=list(result.keys())
+            keys=list(R2DP_data.keys())
+            time=list(R2DP_data.keys())[-1]
+
+            Gaussian_data=dma.get_Gaussian(time, delta, total_epsilon)
+
             
-            plotter.plot_time_vs_l1_for_fixed_epsilon(keys,result, total_epsilon)
+            plotter.plot_time_vs_l1_for_fixed_epsilon(keys,R2DP_data, Gaussian_data,  total_epsilon)
 
 
     elif type_plot==2:
 
     #plot 1 data preparation ...
         # 
-        total_epsilons=[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
+        total_epsilons=[0.1, 0.5, 1, 1.5, 2, 4, 8, 16]
         epsilons_utility_R2DP={}
         delta_utility_Gaussian={}
         for total_epsilon in total_epsilons:
@@ -82,7 +86,7 @@ if __name__=="__main__":
 
         # , 10**(-20), 10**(-30), 10**(-40)
     
-        deltas = [10**(-1), 10**(-5), 10**(-10), 10**(-15)]
+        deltas = [10**(-1), 10**(-5), 10**(-10), 10**(-15), 10**(-20), 10**(-30), 10**(-40)]
         delta_utility_R2DP={}
         delta_utility_Gaussian={}
         for delta in deltas:
@@ -116,8 +120,8 @@ if __name__=="__main__":
     
     elif type_plot==4 :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
-        total_epsilon=1
-        R2DP_epsilon_utility=dma.get_R2DP_nosies(sigma, delta, total_epsilon, "late")
+        total_epsilon=0.15
+        R2DP_epsilon_utility=dma.get_R2DP_nosies(sigma, delta, total_epsilon)
 
         times=list(R2DP_epsilon_utility.keys())[-1]
 

@@ -244,7 +244,8 @@ class DynamicMomentR2DP:
 
         """
 
-        valid_paramters=[(k, theta, alpha) for alpha in self.DEFAULT_ALPHAS for theta in self.THETA for k in self.K if alpha < (1/theta) and k > ((-1) * (np.log(2*alpha-1)/alpha) / (np.log(1-(alpha-1) * theta)))]
+        valid_paramters=[(k, theta, alpha) for alpha in self.DEFAULT_ALPHAS for theta in self.THETA for k in self.K if alpha < (1/theta) and k > (((-1) * (np.log((2*alpha)-1)/alpha)) / (np.log(1-((alpha-1) * theta))))]
+        valid_paramters = sorted(valid_paramters, key=lambda valid_paramters: valid_paramters[0])
         t=1
         epsilon_R2DP=0
         l1_R2DP=0
@@ -305,10 +306,21 @@ class DynamicMomentR2DP:
                             }
             
 
+            # if len(best_params)>0:
+            #     usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon'], delta)
+            #     best_params['useful']=usefulness_R2DP
+            #     previous_epsilons_utility.update({t:best_params})  
+            # else: 
+            #     key=list(previous_epsilons_utility.keys())[-1]
+            #     val=previous_epsilons_utility[key]
+            #     previous_epsilons_utility.update({t:val})  
+
             if len(best_params)>0:
                 usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon'], delta)
                 best_params['useful']=usefulness_R2DP
                 previous_epsilons_utility.update({t:best_params})  
+            else: 
+                break 
 
             t=t+1
             

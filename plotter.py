@@ -30,10 +30,10 @@ class Plotter:
 
 
 
-    def plot_time_vs_l1_for_fixed_epsilon(self, key, data, total_epsilon):
+    def plot_time_vs_l1_for_fixed_epsilon(self, key, R2DP_data, Gaussian_data,  total_epsilon):
 
-        l1_r2dps=[ values['l1_R2DP'] for key, values in data.items()]
-        l1_gaussian=[ values['l1_Gaussian'] for key, values in data.items()]
+        l1_r2dps=[ values['l1'] for key, values in R2DP_data.items()]
+        l1_gaussian=[ values['l1'] for key, values in Gaussian_data.items()]
         
         plt.figure(figsize=(10, 6))
         plt.plot(key, l1_r2dps, '-b', label='L1 R2DP')
@@ -107,7 +107,7 @@ class Plotter:
         l1_r2dps=[ values['l1'] for key, values in data_R2DP.items()]
         l1_gaussian=[ values['l1'] for key, values in data_Gaussian.items()]
         
-        key=np.log(key)
+        key=key
 
         plt.figure(figsize=(10, 6))
         plt.plot(key, l1_r2dps, '-b', label='L1 R2DP')
