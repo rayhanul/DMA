@@ -10,6 +10,8 @@ from scipy.stats import gamma, laplace
 class DynamicMomentR2DP:
 
     def __init__(self, number_paramters):
+        random.seed(40)
+        np.random.seed(30)
         self.DEFAULT_ALPHAS= [x for x in range(2, 50)]
         self.K=np.random.randint(1,20,number_paramters)
         self.THETA=np.linspace(0.001, 10, number_paramters)
@@ -218,7 +220,7 @@ class DynamicMomentR2DP:
         Gaussian_l1_epsilon_utility={}
         
         sigma=self.get_optimum_sigma_gaussian(time, total_epsilon, delta)
-        for time in range(time):
+        for time in range(1,time+1):
             Gaussian_l1_epsilon_utility.update({time:{
                 'epsilon':self.get_epsilon_gaussian(time, sigma, delta), 
                 'l1':self.get_l1_Gaussian(sigma, time)}})
@@ -246,13 +248,14 @@ class DynamicMomentR2DP:
 
         valid_paramters=[(k, theta, alpha) for alpha in self.DEFAULT_ALPHAS for theta in self.THETA for k in self.K if alpha < (1/theta) and k > (((-1) * (np.log((2*alpha)-1)/alpha)) / (np.log(1-((alpha-1) * theta))))]
         valid_paramters = sorted(valid_paramters, key=lambda valid_paramters: valid_paramters[0])
+        # print(f'param length : {len(valid_paramters)}')
         t=1
         epsilon_R2DP=0
         l1_R2DP=0
         previous_epsilons_utility={}
         
         sigma=self.get_optimum_sigma_gaussian(self.total_Time, total_epsilon, delta)
-        # print(f"sigma: {sigma}")
+        # 
         while epsilon_R2DP <= total_epsilon:
 
             # epsilon_Gaussian_t= self.get_epsilon_gaussian(t, sigma, delta)
@@ -280,7 +283,8 @@ class DynamicMomentR2DP:
 
                 if epsilon_R2DP_t==None or epsilon_R2DP_t<0:
                     continue
-
+                
+                # print(f'R2DP epsilon at time {t} : {epsilon_R2DP_t} total epsilon: {(total_epsilon/self.total_Time) * t }')
                 if epsilon_R2DP_t < (total_epsilon/self.total_Time) * t :
 
                     l1_R2DP=self.get_l1_R2DP( t, k, theta, previous_epsilons_utility)
@@ -316,9 +320,11 @@ class DynamicMomentR2DP:
             #     previous_epsilons_utility.update({t:val})  
 
             if len(best_params)>0:
-                usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon'], delta)
-                best_params['useful']=usefulness_R2DP
-                previous_epsilons_utility.update({t:best_params})  
+                if best_params['epsilon'] < total_epsilon:
+                    usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon'], delta)
+                    # print(f"Time: {t}, epsilon: {best_params['epsilon']}")
+                    best_params['useful']=usefulness_R2DP
+                    previous_epsilons_utility.update({t:best_params})  
             else: 
                 break 
 
@@ -332,11 +338,13 @@ class DynamicMomentR2DP:
         def laprnd(mu, b, size):
             return laplace.rvs(loc=mu, scale=b, size=size)
 
-        num_samples=100
+        num_samples=1200
         valid_paramters=[(k, theta, alpha) for alpha in self.DEFAULT_ALPHAS for theta in self.THETA for k in self.K if alpha < (1/theta) and k > ((-1) * (np.log(2*alpha-1)/alpha) / (np.log(1-(alpha-1) * theta)))]
         R2DP_noise=[]
         Gaussian_noise=[]
-        for param in valid_paramters: 
+        random_params=random.sample(valid_paramters, 100)
+        prev_gamma=0
+        for param in random_params: 
 
             gamma_sample1 = gamma.rvs(param[0], scale=param[1], size=num_samples)
             # gamma_sample1 = gamma.rvs(2, scale=1, size=num_samples)
@@ -344,7 +352,8 @@ class DynamicMomentR2DP:
             # gamma_sample3 = gamma.rvs(k3, scale=theta3, size=ns)
 
             # Calculate inverses
-            inverse_sum1 = 1. / gamma_sample1
+            prev_gamma += gamma_sample1
+            inverse_sum1 = 1. / prev_gamma
             # inverse_sum2 = 1. / (gamma_sample1 + gamma_sample2)
             # inverse_sum3 = 1. / (gamma_sample1 + gamma_sample2 + gamma_sample3)
 

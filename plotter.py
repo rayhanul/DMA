@@ -16,14 +16,17 @@ class Plotter:
         x_axis=[i for i in range(len_keys)]
 
         plt.figure()
-        plt.scatter(x_axis, r2dp_data, label='R2DP')
-        plt.scatter(x_axis, gaussian_data, label='Gaussian')
+        plt.plot(x_axis, r2dp_data, label='R2DP')
+        plt.plot(x_axis, gaussian_data, label='Gaussian')
 
         plt.xlabel('Number of Samples')
         plt.ylabel('Mean L1 Distance')
         plt.title('L1 Distance Evaluation')
         plt.legend()
         plt.grid(True)
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name=f"noise_vs_mean_l1_{timestamp}.png"
+        plt.savefig(file_name)
         plt.show()
 
         
@@ -165,6 +168,7 @@ class Plotter:
         plt.savefig(file_name)
 
         plt.show()
+        plt.close()
 
     def plot_epsilon_for_different_time(self, data_R2DP, data_Gaussian, title):
 
@@ -187,6 +191,7 @@ class Plotter:
         plt.savefig(file_name)
 
         plt.show()
+        plt.close()
 
 
 
