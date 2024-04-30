@@ -146,6 +146,47 @@ class Plotter:
         file_name=f"delta_vs_usefulness_{timestamp}.png"
         plt.savefig(file_name)
 
+    def plot_l1_epsilon_vs_time(self, r2dp_data, gaussian_data, title):
+
+        key=list(r2dp_data.keys())
+
+        l1_r2dps=[ values['l1'] for key, values in r2dp_data.items()]
+        l1_gaussian=[ values['l1'] for key, values in gaussian_data.items()]
+
+        epsilon_r2dps=[ values['epsilon'] for key, values in r2dp_data.items()]
+        epsilon_gaussian=[ values['epsilon'] for key, values in gaussian_data.items()]
+
+        fig, ax1=plt.subplots()
+
+        ax1.set_xlabel('time')
+
+        ax1.set_ylabel(r"$\epsilon$")
+        line1=ax1.plot(key, epsilon_r2dps, color='tab:red', label='Epsilon R2DP')[0]
+        line2=ax1.plot(key, epsilon_gaussian, color='tab:blue', label='Epsilon Gaussian')[0]
+
+
+        ax2 = ax1.twinx() 
+
+        ax2.set_ylabel(r"$l_1$ metric")
+        line3=ax2.plot(key, l1_r2dps, color='tab:red', label='L1 R2DP', linestyle='--')[0]
+        line4=ax2.plot(key, l1_gaussian, color='tab:blue', label='L1 R2DP', linestyle='--')[0]
+
+        lines = [line1, line2, line3, line4]
+        labels = [line.get_label() for line in lines]
+        ax1.legend(lines, labels, loc='upper left')
+
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name=f"Time_vs_Epsilon_Utility_{timestamp}.png"
+        plt.title(title, fontsize=14, color='blue', fontweight='bold')
+        plt.savefig(file_name)
+
+
+        fig.tight_layout()  
+        plt.show()
+        plt.close()
+        
+
+        
 
     def plot_l1_for_different_time(self, r2dp_data, gaussian_data, title):
 

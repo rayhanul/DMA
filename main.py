@@ -31,7 +31,7 @@ if __name__=="__main__":
     # 4 : default behavior which plot l1 for differnet time
 
     
-    type_plot=6
+    type_plot=4
     #plot 1 for all T 
     if type_plot==1:
         #  0.75, 1, 1.25, 1.5, 
@@ -140,8 +140,10 @@ if __name__=="__main__":
 
         title=r"total $\epsilon$ ={0}, $\delta = {1}$".format(total_epsilon, delta)
 
-        plotter.plot_l1_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
-        plotter.plot_epsilon_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
+        plotter.plot_l1_epsilon_vs_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
+        # plotter.plot_l1_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
+        # plotter.plot_epsilon_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
+
         # plotter.plot_usefulness_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
 
     else: 
