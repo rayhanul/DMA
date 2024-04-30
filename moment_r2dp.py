@@ -320,11 +320,10 @@ class DynamicMomentR2DP:
             #     previous_epsilons_utility.update({t:val})  
 
             if len(best_params)>0:
-                if best_params['epsilon'] < total_epsilon:
-                    usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon'], delta)
-                    # print(f"Time: {t}, epsilon: {best_params['epsilon']}")
-                    best_params['useful']=usefulness_R2DP
-                    previous_epsilons_utility.update({t:best_params})  
+                usefulness_R2DP=self.get_usefullness_R2DP(k, best_params['theta'], best_params['epsilon'], delta)
+                # print(f"Time: {t}, epsilon: {best_params['epsilon']}")
+                best_params['useful']=usefulness_R2DP
+                previous_epsilons_utility.update({t:best_params})  
             else: 
                 break 
 
