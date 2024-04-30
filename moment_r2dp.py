@@ -285,7 +285,8 @@ class DynamicMomentR2DP:
                     continue
                 
                 # print(f'R2DP epsilon at time {t} : {epsilon_R2DP_t} total epsilon: {(total_epsilon/self.total_Time) * t }')
-                if epsilon_R2DP_t < (total_epsilon/self.total_Time) * t :
+                # (total_epsilon/self.total_Time) * t
+                if epsilon_R2DP_t <  total_epsilon:
 
                     l1_R2DP=self.get_l1_R2DP( t, k, theta, previous_epsilons_utility)
 
