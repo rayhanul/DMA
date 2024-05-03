@@ -223,7 +223,8 @@ class DynamicMomentR2DP:
         for time in range(1,time+1):
             Gaussian_l1_epsilon_utility.update({time:{
                 'epsilon':self.get_epsilon_gaussian(time, sigma, delta), 
-                'l1':self.get_l1_Gaussian(sigma, time)}})
+                'l1':self.get_l1_Gaussian(sigma, time),
+                'sigma':sigma}})
             
         return Gaussian_l1_epsilon_utility
 
@@ -332,6 +333,44 @@ class DynamicMomentR2DP:
             
         return previous_epsilons_utility
 
+    def get_noise_R2DP_Gaussian(self, r2dp_data, gaussian_data):
+
+        output_r2dp={}
+        num_samples_list=[50]
+
+        r2dp_time=list(r2dp_data.keys())
+
+        for time in r2dp_time:
+            k=r2dp_data[time]['k']
+            theta=r2dp_data[time]['theta']
+
+            # num_sample= random.choice(num_samples_list)
+            num_sample = num_samples_list[0]
+            b = np.random.gamma(k, theta, num_sample)
+            sample_r2dp=np.random.laplace(0, 1/b)
+            avg_output_r2dp = np.mean(sample_r2dp)
+            std_dev_output_r2dp=np.std(sample_r2dp)
+
+
+            std_dev = gaussian_data[time]['sigma']
+            sample_gaussian= np.random.normal(0, std_dev, num_sample)
+
+            avg_output_gaussian = np.mean(sample_gaussian)
+            std_dev_output_gaussian=np.std(sample_gaussian)
+
+
+            output_r2dp.update({time: {'avg_output_r2dp':avg_output_r2dp, 
+                                       'avg_output_gaussian': avg_output_gaussian,
+                                       'std_output_r2dp':std_dev_output_r2dp, 
+                                       'std_output_gaussian': std_dev_output_gaussian, 
+                                       'sample_r2dp': sample_r2dp,
+                                       'sample_gaussian': sample_gaussian
+                                       }
+                                       })
+            
+
+
+        return output_r2dp
 
     def get_R2DP_Gaussian_noise(self):
 

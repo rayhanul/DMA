@@ -146,13 +146,84 @@ class Plotter:
         file_name=f"delta_vs_usefulness_{timestamp}.png"
         plt.savefig(file_name)
 
-    def plot_time_vs_noise():
-        print("something")
+    def plot_PDF(self, data):
+
+        print("data")
+
+    def plot_time_vs_noise_in_boxplot(self, input_data, epsilon, num_time=6):
+
+        file_name= f'time_output_epsilon_{epsilon}_boxplot.jpg'
+        d1_r2dp =  [ values['sample_r2dp'] for key, values in input_data.items() if key < num_time]
+        d2_gaussian =  [ values['sample_gaussian'] for key, values in input_data.items() if key < num_time]
+
+        fig, ax = plt.subplots()
+
+        # Data for plotting
+        data = [group for pair in zip(d1_r2dp, d2_gaussian) for group in pair]  # Flatten and interleave d_1 and d_2
+
+        # Positions for each dataset
+        positions = [1 + 2*i for i in range(num_time-1)] + [2 + 2*i for i in range(num_time-1)]
+        positions.sort()
+
+        # Colors for differentiation
+        colors = ['lightblue' if i % 2 == 0 else 'lightgreen' for i in range(2*(num_time-1))]
+
+        # Creating box plots
+        box = ax.boxplot(data, positions=positions, patch_artist=True, notch=True, widths=0.6)
+
+        # Coloring the boxes
+        for patch, color in zip(box['boxes'], colors):
+            patch.set_facecolor(color)
+
+        # Adding titles and labels
+        ax.set_title('Comparison of Groups in Datasets R2DP and Gaussian')
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Values')
+        ax.set_xticks([1.5 + 2*i for i in range(num_time-1)])  # Set x-ticks to be between the groups
+        ax.set_xticklabels([f'{i+1}' for i in range(num_time-1)])  # Label groups
+
+        # Add legend
+        from matplotlib.patches import Patch
+        legend_elements = [Patch(facecolor='lightblue', label='R2DP'),
+                        Patch(facecolor='lightgreen', label='Gaussian')]
+        ax.legend(handles=legend_elements, loc='upper right')
+
+        # Show the plot
+        plt.grid(True)
+
+        plt.savefig(file_name)
+        plt.show()
+
+    def plot_time_vs_noise_in_line_chart(self, data, epsilon):
+
+        times=list(data.keys())
+        file_name= f'time_output_epsilon_{epsilon}_line_plot.png'
+        avg_output_r2dp =  [ values['avg_output_r2dp'] for key, values in data.items()]
+        avg_output_gaussian =  [ values['avg_output_gaussian'] for key, values in data.items()]
+
+
+        plt.figure(figsize=(10, 5))
+
+        plt.plot(times, avg_output_r2dp, label='Output R2DP', marker='o', linestyle='-', color='b')
+        plt.plot(times, avg_output_gaussian, label='Output Gaussian', marker='x', linestyle='--', color='r')
+
+        plt.title('Output Over Time')
+        plt.xlabel('Time')
+        plt.ylabel('Output')
+        plt.legend()
+
+        plt.grid(True)
+        plt.savefig(file_name)
+        
+        plt.show()
+
+        
 
 
 
-    def plot_l1_epsilon_vs_time(self, r2dp_data, gaussian_data, title, l1_budget, is_l1_within_limit=False):
-
+    def plot_l1_epsilon_vs_time(self, r2dp_data, gaussian_data, title, total_epsilon, l1_budget, is_l1_within_limit=False):
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        file_name=f"Time_vs_Epsilon_{total_epsilon}_Utility.png"
         if is_l1_within_limit: 
 
 
@@ -164,6 +235,7 @@ class Plotter:
 
             key_r2dp=[ key for key, values in r2dp_data.items() if values['l1'] < l1_budget]
             key_gaussian=[ key for key, values in gaussian_data.items() if values['l1'] < l1_budget]
+            file_name=f"Time_vs_Epsilon_{total_epsilon}_Utility_with_budget_{l1_budget}.png"
             
         else:
 
@@ -195,8 +267,7 @@ class Plotter:
         labels = [line.get_label() for line in lines]
         ax1.legend(lines, labels, loc='upper left')
 
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        file_name=f"Time_vs_Epsilon_Utility_{timestamp}.png"
+
         plt.title(title, fontsize=14, color='blue', fontweight='bold')
         plt.savefig(file_name)
 
