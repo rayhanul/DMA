@@ -2,6 +2,9 @@
 import matplotlib.pyplot as plt 
 import datetime 
 import numpy as np 
+from scipy.stats import gaussian_kde
+from scipy.stats import gamma 
+
 
 
 class Plotter: 
@@ -146,9 +149,45 @@ class Plotter:
         file_name=f"delta_vs_usefulness_{timestamp}.png"
         plt.savefig(file_name)
 
-    def plot_PDF(self, data):
+    def plot_PDF_Gaussian_And_R2DP(self, data, epsilon):
+        filename=f'pdf_epsilon_{epsilon}.png'
+        avg_output_r2dp =  [ values['avg_output_r2dp'] for key, values in data.items()]
+        avg_output_gaussian =  [ values['avg_output_gaussian'] for key, values in data.items()]
 
-        print("data")
+        plt.figure(figsize=(8, 6))
+
+        density = gaussian_kde(avg_output_gaussian)
+        xs = np.linspace(min(avg_output_gaussian), max(avg_output_gaussian), 300)
+        plt.plot(xs, density(xs), label=f'Gaussian PDF', color='blue')
+        
+        positive_avg_output_r2dp = [data if data>0 else 0.01 for data in avg_output_r2dp]
+        params = gamma.fit(positive_avg_output_r2dp, floc=0)
+        fitted_k, fitted_loc, fitted_theta = params[0], params[1], params[2]
+        x = np.linspace(0, np.max(positive_avg_output_r2dp), 1000)
+        pdf_values = gamma.pdf(x, a=fitted_k, loc=fitted_loc, scale=fitted_theta)
+
+        plt.plot(x, pdf_values, 'r-', label='R2DP PDF')
+        # plt.hist(positive_avg_output_r2dp, bins=30, density=True, alpha=0.6, label='Data Histogram')
+
+
+        plt.title('Probability Density Function (PDF)')
+
+
+
+        plt.xlabel('Random Variable')
+        plt.ylabel('Probability Density')
+
+
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(filename)
+        plt.show()
+
+
+
+
+
+
 
     def plot_time_vs_noise_in_boxplot(self, input_data, epsilon, num_time=6):
 

@@ -120,7 +120,7 @@ if __name__=="__main__":
     
     elif type_plot==4 :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
-        total_epsilon=1.2
+        total_epsilon=1.7
         l1_budget=200
         R2DP_epsilon_utility=dma.get_R2DP_nosies(sigma, delta, total_epsilon)
 
@@ -149,7 +149,9 @@ if __name__=="__main__":
 
         plotter.plot_time_vs_noise_in_line_chart(noise_output, total_epsilon)
 
-        plotter.plot_time_vs_noise_in_boxplot(noise_output, total_epsilon)
+        plotter.plot_time_vs_noise_in_boxplot(noise_output, total_epsilon, 8)
+
+        plotter.plot_PDF_Gaussian_And_R2DP(noise_output, total_epsilon)
 
         # ploting time vs l1, time vs epsilon and time vs epsilon 
 
