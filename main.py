@@ -120,7 +120,8 @@ if __name__=="__main__":
     
     elif type_plot==4 :
     # plot 3 : fix epsilon and delta and plot L1(eps,delta,t) over time t for both noises
-        total_epsilon=0.20
+        total_epsilon=1
+        l1_budget=150
         R2DP_epsilon_utility=dma.get_R2DP_nosies(sigma, delta, total_epsilon)
 
         times=list(R2DP_epsilon_utility.keys())[-1]
@@ -140,7 +141,7 @@ if __name__=="__main__":
 
         title=r"total $\epsilon$ ={0}, $\delta = {1}$".format(total_epsilon, delta)
 
-        plotter.plot_l1_epsilon_vs_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
+        plotter.plot_l1_epsilon_vs_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title, l1_budget, True)
         # plotter.plot_l1_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
         # plotter.plot_epsilon_for_different_time(R2DP_epsilon_utility, gaussian_l1_epsilon, title)
 

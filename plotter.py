@@ -146,30 +146,50 @@ class Plotter:
         file_name=f"delta_vs_usefulness_{timestamp}.png"
         plt.savefig(file_name)
 
-    def plot_l1_epsilon_vs_time(self, r2dp_data, gaussian_data, title):
+    def plot_time_vs_noise():
+        print("something")
 
-        key=list(r2dp_data.keys())
 
-        l1_r2dps=[ values['l1'] for key, values in r2dp_data.items()]
-        l1_gaussian=[ values['l1'] for key, values in gaussian_data.items()]
 
-        epsilon_r2dps=[ values['epsilon'] for key, values in r2dp_data.items()]
-        epsilon_gaussian=[ values['epsilon'] for key, values in gaussian_data.items()]
+    def plot_l1_epsilon_vs_time(self, r2dp_data, gaussian_data, title, l1_budget, is_l1_within_limit=False):
+
+        if is_l1_within_limit: 
+
+
+            l1_r2dps=[ values['l1'] for key, values in r2dp_data.items() if values['l1'] < l1_budget]
+            l1_gaussian=[ values['l1'] for key, values in gaussian_data.items() if values['l1'] < l1_budget]
+
+            epsilon_r2dps=[ values['epsilon'] for key, values in r2dp_data.items() if values['l1'] < l1_budget]
+            epsilon_gaussian=[ values['epsilon'] for key, values in gaussian_data.items() if values['l1'] < l1_budget]
+
+            key_r2dp=[ key for key, values in r2dp_data.items() if values['l1'] < l1_budget]
+            key_gaussian=[ key for key, values in gaussian_data.items() if values['l1'] < l1_budget]
+            
+        else:
+
+            key_r2dp=list(r2dp_data.keys())
+            key_gaussian=list(gaussian_data.keys())
+
+            l1_r2dps=[ values['l1'] for key, values in r2dp_data.items()]
+            l1_gaussian=[ values['l1'] for key, values in gaussian_data.items()]
+
+            epsilon_r2dps=[ values['epsilon'] for key, values in r2dp_data.items()]
+            epsilon_gaussian=[ values['epsilon'] for key, values in gaussian_data.items()]
 
         fig, ax1=plt.subplots()
 
         ax1.set_xlabel('time')
 
         ax1.set_ylabel(r"$\epsilon$")
-        line1=ax1.plot(key, epsilon_r2dps, color='tab:red', label='Epsilon R2DP')[0]
-        line2=ax1.plot(key, epsilon_gaussian, color='tab:blue', label='Epsilon Gaussian')[0]
+        line1=ax1.plot(key_r2dp, epsilon_r2dps, color='tab:red', label='Epsilon R2DP')[0]
+        line2=ax1.plot(key_gaussian, epsilon_gaussian, color='tab:blue', label='Epsilon Gaussian')[0]
 
 
         ax2 = ax1.twinx() 
 
         ax2.set_ylabel(r"$l_1$ metric")
-        line3=ax2.plot(key, l1_r2dps, color='tab:red', label='L1 R2DP', linestyle='--')[0]
-        line4=ax2.plot(key, l1_gaussian, color='tab:blue', label='L1 R2DP', linestyle='--')[0]
+        line3=ax2.plot(key_r2dp, l1_r2dps, color='tab:red', label='L1 R2DP', linestyle='--')[0]
+        line4=ax2.plot(key_gaussian, l1_gaussian, color='tab:blue', label='L1 Gaussian', linestyle='--')[0]
 
         lines = [line1, line2, line3, line4]
         labels = [line.get_label() for line in lines]
