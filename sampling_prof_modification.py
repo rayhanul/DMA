@@ -10,7 +10,16 @@ print(delta_values)
 epsilon_values = np.linspace(0.0001, 0.001, 5)
 print(epsilon_values)
 beta = 0.001
-epsilon_values = np.log(1 + beta * (np.exp(epsilon_values) - 1))
+# epsilon_values = np.log(1 + beta * (np.exp(epsilon_values) - 1))
+# epsilon_values = 1/beta * [(np.exp(epsilon_values)-1) + beta]
+eps_updated=[]
+for eps in epsilon_values:
+   eps_updated.append(1/beta * ((np.exp(eps)-1) +beta))
+
+# epsilon_values = eps_updated 
+
+
+
 delta_values = delta_values
 
 # Initialize arrays to store results
